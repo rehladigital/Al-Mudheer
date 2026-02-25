@@ -1,0 +1,427 @@
+:root {
+
+    --accent1: hsla(199, 100%, 20%, 1);
+    --accent1-hsl: 199, 100%, 20%;
+    --accent1-hover: #555;
+    --accent1-color:#fff;
+    --focus-ring-color: var(--accent1);
+
+    --accent2: hsla(168, 100%, 33%, 1);
+    --accent2-hsl: 168, 100%, 33%;
+    --accent2-hover: #555;
+    --accent2-color:#fff;
+
+    --nav-link-color: #fff;
+    --header-nav-link-color: #fff;
+
+    --tab-background: rgba(245, 245, 245, 1);
+    --tab-color: var(--accent1);
+    --tab-hover-background: var(--neutral);
+    --tab-active-background: rgba(245, 245, 245, 1);
+    --tab-active-color: #333;
+
+    --primary-content-bg-opacity: 0.15;
+    --main-titles-color: #fff;
+
+    --primary-background: rgba(255, 255, 255, 0.8);
+    --secondary-background: rgba(255, 255, 255, 1);
+    --layered-background: rgba(255, 255, 255, 0.9);
+    --light-layered-background: rgba(255, 255, 255, 0.4);
+
+    --primary-font-color: #333333;
+    --secondary-font-color: #000;
+
+    --neutral: rgba(230, 230, 230, 0.8);
+    --solid-neutral: rgba(220, 220, 220, 1);
+    --neutral-background: rgba(240, 240, 240, 0.7);
+
+    --col-title-bg: rgb(255, 255, 255, 1);
+    --col-content-bg:  rgba(255,255,255, 0.8);
+    --col-hover-bg: rgba(245, 245, 245, 0.7);
+    --col-row-striped: rgba(250, 250, 250, 0.5);
+
+    --primary-color: var(--accent1);
+    --secondary-color: var(--accent2);
+
+    --main-bg: var(--primary-background);
+    --left-panel-bg: transparent;
+    --content-bg: var(--secondary-background);
+
+    --glass-blur: blur( 8px );
+    --glass-background: rgba(255,255,255,0.85);
+    --glass-border: 1px solid rgba(255,255,255,0.9);
+
+    --main-action-bg: var(--accent1);
+    --main-action-color: var(--accent1-color);
+    --main-action-hover-bg: var(--accent1-hover);
+    --main-action-hover-color: var(--accent1-color);
+
+    --secondary-action-bg: var(--primary-background);
+    --secondary-action-color: var(--primary-font-color);
+    --secondary-action-hover-bg: var(--accent2-hover);
+    --secondary-action-hover-color: var(--accent2-color);
+
+    --main-menu-link-bg: var(--secondary-background);
+    --main-menu-link-color: var(--primary-font-color);
+
+    --main-menu-link-hover-bg: rgba(255, 255, 255, 0.2);
+    --main-menu-link-hover-color: var(--accent1);
+
+    --main-menu-overlayed-link-hover-bg: rgba(255, 255, 255, 0.4);
+
+    --main-menu-link-active-bg: var(--primary-background);
+    --main-menu-link-active-color: var(--accent1);
+
+    --main-menu-border-color:var(--neutral);
+
+    --project-selector-bg: var(--secondary-background);
+    --project-selector-color: var(--primary-font-color);
+    --project-selector-hover-bg: var(--primary-background);
+    --project-selector-hover-color: var(--primary-font-color);
+
+    --dropdown-link-bg:var(--secondary-background);
+    --dropdown-link-color: var(--primary-font-color);
+    --dropdown-link-hover-bg: var(--tab-active-background);
+    --dropdown-link-hover-color: var(--primary-font-color);
+
+    --input-background: #fff;
+
+    --header-action-hover-color:var(--neutral);
+    --header-bg-color:var(--accent1);
+    --header-gradient:linear-gradient(135deg, var(--accent1) 20%,var(--accent2) 90%);
+    --element-gradient:linear-gradient(135deg, var(--accent1) 20%,var(--accent2) 100%);
+
+    --primary-font-family: 'Roboto', 'Helvetica Neue', Helvetica, sans-serif;
+
+    --font-size-xs: 10px;
+    --font-size-s: 12px;
+    --base-font-size: 14px;
+    --font-size-m: var(--base-font-size);
+    --font-size-l: 16px;
+    --font-size-xl: 18px;
+    --font-size-xxl: 20px;
+    --font-size-xxxl: 24px;
+
+    --main-border-color:rgba(220,220,220, 1);
+    --main-border-color-hover:rgba(200,200,200, 0.9);
+
+    /* Softer shadows */
+    --min-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
+    --regular-shadow: 0px 4px 8px rgba(0, 0, 0, 0.08);
+    --large-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
+
+    --box-radius-large: 24px;
+    --box-radius: 16px;
+    --box-radius-small: 8px;
+    --element-radius: 16px;
+    --input-radius: 15px;
+
+    --input-shadow: 0px 1px 2px rgba(0, 0, 0, 0.075);
+    --input-padding: 4px 10px;
+
+    --kanban-col-bg: transparent;
+    --kanban-col-title-bg: var(--col-title-bg);
+    --kanban-col-title-color:var(--primary-font-color);
+    --kanban-card-bg: var(--layered-background);
+    --kanban-card-hover: rgba(240, 240, 240, 0.8);
+
+
+    --accordion-header-bg: var(--secondary-action-bg);
+    --accordion-header-radius: 10px;
+
+    --interactive-icon-color: #777;
+
+    --dark-red: #c41e3a;
+    --dark-red-text-color: #fff;
+
+    --red: #d64045;
+    --red-text-color: #fff;
+
+    --green: #2e7d32;
+    --green-text-color: #fff;
+
+    --dark-green: #1b5e20;
+    --dark-green-text-color: #fff;
+
+    --yellow: #f9a825;
+    --yellow-text-color: #000;
+
+    --blue: #1976d2;
+    --blue-text-color: #fff;
+
+    --dark-blue: #0d47a1;
+    --dark-blue-text-color: #fff;
+
+    --darker-blue: #002171;
+    --darker-blue-text-color: #fff;
+
+    --purple:#5F0F40;
+    --purple-text-color:#fff;
+
+    --magenta:#bb1b75;
+    --purple-text-color:#fff;
+
+    --pink: #F26CA7;
+    --pink-text-color:#000;
+
+    --brown: #BB611B;
+    --brown-text-color: #fff;
+
+    --grey: #aaaaaa;
+    --grey-text-color:#000;
+
+    --dark-grey: #4c4c4c;
+    --dark-grey-text-color: #fff;
+
+    --teal: #1bbbb1;
+    --teal-text-color: #fff;
+
+    --zlayer-1: 1; /*Background*/
+    --zlayer-2: 5; /* Maincontentinnnter */
+    --zlayer-3: 10; /* Element contentinner */
+    --zlayer-4: 15; /* over element contentinnter (headlines, status) */
+    --zlayer-5: 20; /* Highest layer on content inner (Filters) */
+    --zlayer-6: 25; /* modal */
+    --zlayer-7: 30; /* modal dropdowns*/
+    --zlayer-8: 35; /* modal dialogs */
+    --zlayer-9: 40; /* modal modals*/
+
+    --transparencyLayer: transparent;
+
+    /* Priority Colors */
+    --priority-critical: #dc2626;      /* Red-600 */
+    --priority-critical-bg: #fee2e2;   /* Red-100 */
+    --priority-high: #f97316;          /* Orange-500 */
+    --priority-high-bg: #ffedd5;       /* Orange-100 */
+    --priority-medium: #eab308;        /* Yellow-500 */
+    --priority-medium-bg: #fef3c7;     /* Yellow-100 */
+    --priority-low: #22c55e;           /* Green-500 */
+    --priority-low-bg: #dcfce7;        /* Green-100 */
+    --priority-lowest: #6b7280;        /* Gray-500 */
+    --priority-lowest-bg: #f3f4f6;     /* Gray-100 */
+
+    /* Swimlane Header Design Tokens */
+    --swimlane-header-bg: var(--layered-background);
+    --swimlane-header-border: var(--main-border-color);
+    --swimlane-header-hover: var(--col-hover-bg);
+    --swimlane-indicator-size: 32px;
+    --swimlane-label-font-size: 14px;
+    --swimlane-count-bg: var(--accent2);
+    --swimlane-count-color: white;
+
+    /* Progress Bar Tokens */
+    --progress-bar-height: 4px;
+    --progress-bar-bg: var(--main-border-color);
+    --progress-bar-radius: 2px;
+
+    /* Status Colors for Progress Bars */
+    --status-new-color: #60a5fa;          /* Blue-400 */
+    --status-in-progress-color: #f59e0b;  /* Amber-500 */
+    --status-done-color: #10b981;         /* Emerald-500 */
+
+}
+
+.ss-option:hover {
+    color: white;
+    background-color: var(--accent1) !important;
+}
+
+/* ============================================
+   LIGHT MODE ACCESSIBILITY ENHANCEMENTS
+   ============================================ */
+
+/* Enhanced focus indicators for light mode - high contrast */
+a:focus-visible {
+    outline: 2px solid var(--focus-ring-color);
+    outline-offset: 2px;
+}
+
+/* Dashboard task links - critical for keyboard navigation and low vision users */
+.latest-todos a:focus-visible,
+.sortableTicketList a:focus-visible {
+    outline: 2px solid var(--focus-ring-color);
+    outline-offset: 2px;
+    border-radius: 3px;
+}
+
+/* Button focus states */
+button:focus-visible,
+.btn:focus-visible {
+    outline: 2px solid var(--focus-ring-color);
+    outline-offset: 2px;
+}
+
+/* Form element focus states */
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 2px solid var(--focus-ring-color);
+    border-color: var(--focus-ring-color);
+}
+
+/* Navigation and menu focus */
+.nav a:focus-visible,
+.dropdown-menu a:focus-visible {
+    outline: 2px solid var(--focus-ring-color);
+    outline-offset: 1px;
+}
+
+/* Link hover state - high contrast change for low vision accessibility */
+a:hover {
+    color: #000000;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 2px;
+}
+
+/* Dashboard task links - extra visual feedback on hover */
+.latest-todos a:hover,
+.sortableTicketList a:hover {
+    color: #000000;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* ===================================
+   CUSTOM INPUT COMPONENT FOCUS STATES
+   =================================== */
+
+/* Chosen Dropdowns */
+.chosen-container-single .chosen-single:focus-visible,
+.chosen-container-multi .chosen-choices:focus-visible,
+.chosen-container-active.chosen-with-drop .chosen-single {
+    outline: 2px solid var(--accent1) !important;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(var(--accent1-hsl), 0.1);
+}
+
+/* Fallback for keyboard focus when :focus-visible doesn't trigger */
+.chosen-container-single .chosen-single:focus,
+.chosen-container-multi .chosen-choices:focus {
+    outline: 2px solid var(--accent1) !important;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(var(--accent1-hsl), 0.1);
+}
+
+/* Chosen dropdown search input */
+.chosen-container-active .chosen-search input[type="text"]:focus-visible {
+    outline: 2px solid var(--accent1);
+    outline-offset: 2px;
+}
+
+/* SlimSelect */
+.ss-main:focus-visible,
+.ss-main.ss-open-above:focus-visible,
+.ss-main.ss-open-below:focus-visible {
+    outline: 2px solid var(--accent1);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(var(--accent1-hsl), 0.1);
+}
+
+/* jQuery UI Datepicker Input */
+input.hasDatepicker:focus-visible {
+    outline: 2px solid var(--accent1);
+    outline-offset: 2px;
+    border-color: var(--accent1);
+    box-shadow: 0 0 0 4px rgba(var(--accent1-hsl), 0.1);
+}
+
+/* jQuery UI Datepicker Widget - when opened */
+.ui-datepicker .ui-state-active:focus-visible,
+.ui-datepicker .ui-datepicker-current-day a:focus-visible {
+    outline: 2px solid var(--accent1);
+    outline-offset: 1px;
+}
+
+/* TagsInput Container */
+div.tagsinput:focus-within {
+    outline: 2px solid var(--accent1);
+    outline-offset: 2px;
+    border-color: var(--accent1);
+    box-shadow: 0 0 0 4px rgba(var(--accent1-hsl), 0.1);
+}
+
+/* TagsInput Individual Tags */
+.tagsinput span.tag a:focus-visible {
+    outline: 2px solid var(--accent1);
+    outline-offset: 1px;
+}
+
+/* Custom Toggle Switch */
+input[type="checkbox"].toggle:focus-visible + label,
+input[type="checkbox"].toggle:focus-visible + .toggle-label {
+    outline: 2px solid var(--accent1);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(var(--accent1-hsl), 0.1);
+}
+
+/* Radio Tab Component */
+.radioTab:focus-visible {
+    outline: 2px solid var(--accent1);
+    outline-offset: 2px;
+    background-color: rgba(var(--accent1-hsl), 0.05);
+}
+
+/* Selectable Component (emoji, icon, color picker) */
+.selectable:focus-visible {
+    outline: 2px solid var(--accent1);
+    outline-offset: 2px;
+    background-color: rgba(var(--accent1-hsl), 0.1);
+    transform: scale(1.05);
+}
+
+/* Weekday Selector */
+.weekday-label:focus-visible {
+    outline: 2px solid var(--accent1);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(var(--accent1-hsl), 0.1);
+}
+
+/* Kanban Cards */
+.ticketBox:focus-visible {
+    outline: 3px solid var(--accent1);
+    outline-offset: 4px;
+    background-color: var(--kanban-card-hover);
+    box-shadow: 0 0 0 6px rgba(var(--accent1-hsl), 0.1);
+}
+
+/* Dropdown Menu Items - Use :focus-visible instead of :focus */
+.dropdown-menu > li > a:focus-visible {
+    background-color: var(--dropdown-link-hover-bg);
+    color: var(--dropdown-link-hover-color);
+    outline: 2px solid var(--accent1);
+    outline-offset: -2px;
+}
+
+/* Upload Buttons */
+.uppy-FileInput-btn:focus-visible,
+.date-picker-form-control .reset-button:focus-visible {
+    outline: 2px solid var(--accent1);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(var(--accent1-hsl), 0.1);
+}
+
+/* Time Pickers */
+input[type="time"]:focus-visible {
+    outline: 2px solid var(--accent1);
+    outline-offset: 2px;
+    border-color: var(--accent1);
+    box-shadow: 0 0 0 4px rgba(var(--accent1-hsl), 0.1);
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    .selectable:focus-visible {
+        transform: none;
+    }
+}
+
+/* CRITICAL: Remove Bootstrap inset shadow from Chosen search input */
+.chosen-container-multi .chosen-choices li.search-field input[type="text"],
+.chosen-container-multi .chosen-choices .search-field input,
+.chosen-container .chosen-choices input.chosen-search-input,
+#collaborators_chosen input[type="text"] {
+    box-shadow: none !important;
+    -webkit-box-shadow: none !important;
+}
