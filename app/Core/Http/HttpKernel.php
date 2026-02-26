@@ -18,7 +18,7 @@ class HttpKernel extends Kernel
     use DispatchesEvents;
 
     protected $bootstrappers = [
-        \Illuminate\Foundation\Bootstrap\LoadEnvironmentVariables::class,
+        \Leantime\Core\Bootstrap\LoadEnvironmentVariables::class,
         \Leantime\Core\Bootstrap\LoadConfig::class,
         \Illuminate\Foundation\Bootstrap\HandleExceptions::class,
         \Illuminate\Foundation\Bootstrap\RegisterFacades::class,

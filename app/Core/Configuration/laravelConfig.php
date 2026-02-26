@@ -534,7 +534,7 @@ return [
 
     ],
     'database' => [
-        'default' => env('LEAN_DB_DEFAULT_CONNECTION', 'mysql'),
+        'default' => env('LEAN_DB_DEFAULT_CONNECTION', env('DB_CONNECTION', 'mysql')),
         /*
         |--------------------------------------------------------------------------
         | Database Connections
@@ -548,7 +548,7 @@ return [
         'connections' => [
             'sqlite' => [
                 'driver' => 'sqlite',
-                'url' => env('LEAN_DB_URL'),
+                'url' => env('LEAN_DB_URL', env('DATABASE_URL')),
                 'database' => database_path('database.sqlite'),
                 'prefix' => '',
                 'foreign_key_constraints' => env('LEAN_DB_FOREIGN_KEYS', true),
@@ -558,15 +558,15 @@ return [
             ],
             'mysql' => [
                 'driver' => 'mysql',
-                'url' => env('LEAN_DB_URL'),
-                'host' => env('LEAN_DB_HOST', '127.0.0.1'),
-                'port' => env('LEAN_DB_PORT', '3306'),
-                'database' => env('LEAN_DB_DATABASE', 'laravel'),
-                'username' => env('LEAN_DB_USER', 'root'),
-                'password' => env('LEAN_DB_PASSWORD', ''),
-                'unix_socket' => env('LEAN_DB_SOCKET', ''),
-                'charset' => env('LEAN_DB_CHARSET', 'utf8mb4'),
-                'collation' => env('LEAN_DB_COLLATION', 'utf8mb4_unicode_ci'),
+                'url' => env('LEAN_DB_URL', env('DATABASE_URL')),
+                'host' => env('LEAN_DB_HOST', env('DB_HOST', '127.0.0.1')),
+                'port' => env('LEAN_DB_PORT', env('DB_PORT', '3306')),
+                'database' => env('LEAN_DB_DATABASE', env('DB_DATABASE', 'laravel')),
+                'username' => env('LEAN_DB_USER', env('DB_USERNAME', 'root')),
+                'password' => env('LEAN_DB_PASSWORD', env('DB_PASSWORD', '')),
+                'unix_socket' => env('LEAN_DB_SOCKET', env('DB_SOCKET', '')),
+                'charset' => env('LEAN_DB_CHARSET', env('DB_CHARSET', 'utf8mb4')),
+                'collation' => env('LEAN_DB_COLLATION', env('DB_COLLATION', 'utf8mb4_unicode_ci')),
                 'prefix' => '',
                 'prefix_indexes' => true,
                 'strict' => false,
@@ -574,7 +574,7 @@ return [
                     'ANSI_QUOTES',
                 ],
                 'engine' => 'InnoDB',
-                'sslmode' => env('LEAN_DB_SSLMODE', ''),
+                'sslmode' => env('LEAN_DB_SSLMODE', env('DB_SSLMODE', '')),
                 'options' => extension_loaded('pdo_mysql') ? array_filter([
                     PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => env('LEAN_DB_MYSQL_ATTR_SSL_VERIFY_SERVER', false),
                     PDO::MYSQL_ATTR_SSL_KEY => env('LEAN_DB_MYSQL_ATTR_SSL_KEY'),
@@ -596,17 +596,17 @@ return [
             ],
             'pgsql' => [
                 'driver' => 'pgsql',
-                'url' => env('LEAN_DB_URL'),
-                'host' => env('LEAN_DB_HOST', '127.0.0.1'),
-                'port' => env('LEAN_DB_PORT', '5432'),
-                'database' => env('LEAN_DB_DATABASE', 'leantime'),
-                'username' => env('LEAN_DB_USER', 'postgres'),
-                'password' => env('LEAN_DB_PASSWORD', ''),
-                'charset' => env('LEAN_DB_CHARSET', 'utf8'),
+                'url' => env('LEAN_DB_URL', env('DATABASE_URL')),
+                'host' => env('LEAN_DB_HOST', env('DB_HOST', '127.0.0.1')),
+                'port' => env('LEAN_DB_PORT', env('DB_PORT', '5432')),
+                'database' => env('LEAN_DB_DATABASE', env('DB_DATABASE', 'leantime')),
+                'username' => env('LEAN_DB_USER', env('DB_USERNAME', 'postgres')),
+                'password' => env('LEAN_DB_PASSWORD', env('DB_PASSWORD', '')),
+                'charset' => env('LEAN_DB_CHARSET', env('DB_CHARSET', 'utf8')),
                 'prefix' => '',
                 'prefix_indexes' => true,
-                'search_path' => env('LEAN_DB_SCHEMA', 'public'),
-                'sslmode' => env('LEAN_DB_SSLMODE', 'prefer'),
+                'search_path' => env('LEAN_DB_SCHEMA', env('DB_SCHEMA', 'public')),
+                'sslmode' => env('LEAN_DB_SSLMODE', env('DB_SSLMODE', 'prefer')),
                 'options' => extension_loaded('pdo_pgsql') ? array_filter([
                     PDO::ATTR_PERSISTENT => env('LEAN_DB_PERSISTENT_CONNECTIONS', true),
                     PDO::ATTR_TIMEOUT => env('LEAN_DB_CONNECTION_TIMEOUT', 30),

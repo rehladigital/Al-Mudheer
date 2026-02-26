@@ -52,7 +52,6 @@
     "datatables.net-buttons": "^2.4.2",
     "datatables.net-rowgroup": "^1.4.1",
     "datatables.net-rowreorder": "^1.4.1",
-    "express": "^5.2.1",
     "fullcalendar": "^6.1.11",
     "gridstack": "^12.1.1",
     "htmx.org": "^1.9.12",
@@ -96,10 +95,6 @@
     "webpack-cli": "^5.1.4"
   },
   "scripts": {
-    "build": "node -e \"console.log('Hostinger Node wrapper build: ok')\"",
-    "postinstall": "node -e \"console.log('Postinstall: dependencies ready')\"",
-    "start": "node server.js",
-    "hostinger:start": "node server.js",
     "build-assets": "npx mix && node generateBlocklist.mjs"
   },
   "repository": {
