@@ -268,6 +268,21 @@ foreach ($relevanceLevels as $level => $labelKey) { ?>
 
                                     <div class="row">
                                         <div class="col-md-3">
+                                            <label for="microsoftAuthRedirectUri">Redirect URI</label>
+                                        </div>
+                                        <div class="col-md-7">
+                                            <input type="text"
+                                                   id="microsoftAuthRedirectUri"
+                                                   value="<?php echo BASE_URL; ?>/oidc/callback"
+                                                   class="pull-left"
+                                                   style="width:100%;"
+                                                   readonly="readonly"
+                                                   onclick="this.select();" />
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-3">
                                             <label for="microsoftAuthAllowPublicRegistration">Allow Public Registration</label>
                                         </div>
                                         <div class="col-md-7">
