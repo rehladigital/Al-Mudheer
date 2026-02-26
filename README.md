@@ -15,6 +15,8 @@ Acknowledgement: This project is built based on the Leantime open-source project
 
 Rehla Digital (`rehladigital.com`) positions itself as a data analytics and digital growth company focused on helping businesses turn data into decisions and visibility into revenue. Their public service areas include data and analytics consulting, SEO, PPC, social media management, web development, and Google Business Profile optimization, with a results-oriented approach centered on measurable business outcomes.
 
+Website: [https://rehladigital.com](https://rehladigital.com)
+
 ## Why this fork exists
 
 - Company-specific branding and UI customization
@@ -43,6 +45,15 @@ Rehla Digital (`rehladigital.com`) positions itself as a data analytics and digi
 2. Configure `config/.env` with required values
 3. Point web root to `public/`
 4. Open `/install` and complete setup
+
+## Setup helper files
+
+- `composer.phar`: local Composer binary included for environments without a global Composer install.
+- `manual_sqlite_install.php`: helper script to bootstrap SQLite install data.
+
+Use environment variables with `manual_sqlite_install.php`:
+
+`ALMUDHEER_ADMIN_EMAIL`, `ALMUDHEER_ADMIN_PASSWORD`, `ALMUDHEER_ADMIN_FIRSTNAME`, `ALMUDHEER_ADMIN_LASTNAME`, `ALMUDHEER_COMPANY_NAME`, `ALMUDHEER_COMPANY_COUNTRY`, `ALMUDHEER_CURRENCY_CODE`, `ALMUDHEER_TIMEZONE`
 
 ## Development
 
