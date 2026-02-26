@@ -2,6 +2,13 @@
 
 Al Mudheer is a project and work management platform customized for Rehla Digital.
 
+## Project Sponsor
+
+<div align="center">
+  <strong>Rehla Digital Inc</strong><br/><br/>
+  <img src="public/assets/images/logo-login.png" alt="Rehla Digital Inc Logo" width="280" />
+</div>
+
 Acknowledgement: This project is built based on the Leantime open-source project.
 
 ## About Rehla Digital
