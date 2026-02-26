@@ -2,14 +2,6 @@
 
 @section('content')
 
-<x-global::pageheader :icon="'fa fa-house'">
-    <a href="{{ BASE_URL }}/tickets/showKanban?currentProject=&users={{ session('userdata.id') }}&status=not_done" class="headerCTA">
-        <i class="fa fa-table-columns"></i>
-        <span class="tw-text-[14px] tw-leading-[25px]">My Kanban</span>
-    </a>
-    <h1>{{ __('headlines.home') }}</h1>
-</x-global::pageheader>
-
 <div class="maincontent" id="gridBoard" style="margin-top:0px; opacity:0;">
 
     {!! $tpl->displayNotification() !!}
