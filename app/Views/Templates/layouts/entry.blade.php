@@ -3,7 +3,7 @@
 <head>
     @include('global::sections.header')
     <style>
-        .leantimeLogo { position: fixed; bottom: 10px; right: 10px; }
+        .brandLogo { position: fixed; bottom: 10px; right: 10px; }
     </style>
     @stack('styles')
 </head>
@@ -12,7 +12,7 @@
 
 <div class="header hidden-gt-sm tw-p-[10px]" style="background:var(--header-gradient)">
     <a href="{!! BASE_URL !!}" target="_blank">
-        <img src="{{ BASE_URL }}/dist/images/logo.svg" class="tw-h-full "/>
+        <img src="{{ BASE_URL }}/assets/images/logo.png" class="tw-h-full "/>
     </a>
 </div>
 
@@ -21,7 +21,7 @@
 
         <div class="logo">
             <a href="{!! BASE_URL !!}" target="_blank">
-                <img src="{{ BASE_URL }}/dist/images/logo.svg" />
+                <img src="{{ BASE_URL }}/assets/images/logo.png" />
             </a>
         </div>
 
@@ -40,7 +40,7 @@
                 @if($logoPath != '')
                     <a href="{!! BASE_URL !!}" target="_blank">
 
-                        @if(!str_ends_with($logoPath, "dist/images/logo.svg" ))
+                        @if(!str_ends_with($logoPath, "assets/images/logo.png" ))
                             <img src="{{ $logoPath }}" class="tw-h-full "/>
                         @endif
                     </a>
@@ -55,8 +55,8 @@
         </div>
 
     </div>
-    <div class="leantimeLogo">
-        <img style="height: 25px;" src="{!! BASE_URL !!}/dist/images/logo-powered-by-leantime.png">
+    <div class="brandLogo">
+        <img style="height: 25px;" src="{!! BASE_URL !!}/assets/images/logo.png">
     </div>
 </div>
 

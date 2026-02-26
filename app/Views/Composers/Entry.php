@@ -24,7 +24,7 @@ class Entry extends Composer
         $logoUrl = $this->themeCore->getLogoUrl();
 
         return [
-            'logoPath' => $logoUrl ?: BASE_URL.'/dist/images/logo.svg',
+            'logoPath' => $logoUrl ?: BASE_URL.'/assets/images/logo.png',
         ];
     }
 }

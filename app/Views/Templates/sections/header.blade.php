@@ -10,12 +10,12 @@
 <meta name="color-scheme" content="{{ $themeColorMode }}">
 <meta name="theme" content="{{ $theme }}">
 <meta name="identifier-URL" content="{!! BASE_URL !!}">
-<meta name="leantime-version" content="{{ $version }}">
+<meta name="product-version" content="{{ $version }}">
 
 @dispatchEvent('afterMetaTags')
 
-<link rel="shortcut icon" href="{!! BASE_URL !!}/dist/images/favicon.png"/>
-<link rel="apple-touch-icon" href="{!! BASE_URL !!}/dist/images/apple-touch-icon.png">
+<link rel="shortcut icon" href="{!! BASE_URL !!}/assets/images/favicon.png"/>
+<link rel="apple-touch-icon" href="{!! BASE_URL !!}/assets/images/apple-touch-icon.png">
 
 <link rel="stylesheet" href="{!! BASE_URL !!}/dist/css/main.{!! $version !!}.min.css"/>
 <link rel="stylesheet" href="{!! BASE_URL !!}/dist/css/app.{!! $version !!}.min.css"/>

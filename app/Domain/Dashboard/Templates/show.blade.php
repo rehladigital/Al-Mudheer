@@ -2,7 +2,7 @@
 
 @section('content')
 <x-global::pageheader :icon="'fa fa-gauge-high'">
-    @if (count($allUsers) == 1)
+    @if (count($allUsers) == 1 && !($oidcEnabled ?? false))
         <a href="#/users/newUser" class="headerCTA">
             <i class="fa fa-users"></i>
             <span class="tw-text-[14px] tw-leading-[25px]">
@@ -287,7 +287,7 @@
                         </div>
                     @endforeach
 
-                    @if ($login::userIsAtLeast($roles::$manager))
+                    @if ($login::userIsAtLeast($roles::$manager) && !($oidcEnabled ?? false))
                         <div class="col-md-3">
                             <x-users::profile-box>
                                 <a href="#/users/newUser?preSelectProjectId={{ $project['id'] }}">

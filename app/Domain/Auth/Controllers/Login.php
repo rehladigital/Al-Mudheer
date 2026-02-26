@@ -69,7 +69,14 @@ class Login extends Controller
         }
         $this->tpl->assign('redirectUrl', urlencode($redirectUrl));
 
-        $this->tpl->assign('oidcEnabled', $this->config->oidcEnable);
+        $oidcEnabled = $this->settingService->getSetting('companysettings.microsoftAuth.enabled');
+        if ($oidcEnabled === false) {
+            $oidcEnabled = $this->config->oidcEnable;
+        } else {
+            $oidcEnabled = in_array(strtolower((string) $oidcEnabled), ['1', 'true', 'on', 'yes'], true);
+        }
+
+        $this->tpl->assign('oidcEnabled', $oidcEnabled);
 
         $hideLogin = $this->settingService->getSetting('auth.hideDefaultLogin');
 

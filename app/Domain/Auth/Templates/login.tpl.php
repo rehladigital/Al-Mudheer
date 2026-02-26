@@ -58,7 +58,8 @@ $redirectUrl = $tpl->get('redirectUrl');
                 <p style="text-align:center; display:inline-block; background:var(--secondary-background); padding:0px 5px;"><?php echo $tpl->language->__('label.or_login_with'); ?></p>
             </div>
             <a href="<?= BASE_URL ?>/oidc/login" style="width:100%;" class="btn btn-primary">
-            <?php echo $tpl->language->__('buttons.oidclogin'); ?>
+                <span class="fa-brands fa-microsoft" style="margin-right:8px;"></span>
+                <?php echo $tpl->language->__('buttons.microsoft_login'); ?>
             </a>
         </div>
     <?php } ?>

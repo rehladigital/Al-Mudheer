@@ -224,6 +224,10 @@ class Install
             // Since we can't "USE" a database in PostgreSQL like MySQL,
             // the database is specified at connection time
             $this->connection->getPdo()->exec('SET search_path TO public');
+        } elseif ($driver === 'sqlite') {
+            // SQLite uses a single file database selected at connection time.
+            // There is no equivalent of a USE statement.
+            return;
         } else {
             // MySQL: USE statement
             $this->connection->statement('USE `'.$database.'`');

@@ -6,6 +6,7 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Leantime\Core\Controller\Controller;
 use Leantime\Core\Controller\Frontcontroller;
 use Leantime\Core\Controller\Frontcontroller as FrontcontrollerCore;
+use Leantime\Core\Configuration\Environment;
 use Leantime\Domain\Auth\Models\Roles;
 use Leantime\Domain\Auth\Services\Auth as AuthService;
 use Leantime\Domain\Comments\Repositories\Comments as CommentRepository;
@@ -36,6 +37,8 @@ class Show extends Controller
 
     private Setting $settingsSvc;
 
+    private Environment $config;
+
     /**
      * @throws BindingResolutionException
      * @throws BindingResolutionException
@@ -47,7 +50,8 @@ class Show extends Controller
         TimesheetService $timesheetService,
         CommentService $commentService,
         ReactionService $reactionsService,
-        Setting $settingsSvc
+        Setting $settingsSvc,
+        Environment $config
     ): void {
         $this->projectService = $projectService;
         $this->ticketService = $ticketService;
@@ -56,6 +60,7 @@ class Show extends Controller
         $this->commentService = $commentService;
         $this->reactionsService = $reactionsService;
         $this->settingsSvc = $settingsSvc;
+        $this->config = $config;
 
         session(['lastPage' => BASE_URL.'/dashboard/show']);
     }
@@ -86,6 +91,14 @@ class Show extends Controller
 
         $project['assignedUsers'] = $this->projectService->getUsersAssignedToProject($currentProjectId);
         $this->tpl->assign('project', $project);
+
+        $oidcEnabled = $this->settingsSvc->getSetting('companysettings.microsoftAuth.enabled');
+        if ($oidcEnabled === false) {
+            $oidcEnabled = $this->config->oidcEnable;
+        } else {
+            $oidcEnabled = in_array(strtolower((string) $oidcEnabled), ['1', 'true', 'on', 'yes'], true);
+        }
+        $this->tpl->assign('oidcEnabled', $oidcEnabled);
 
         $userReaction = $this->reactionsService->getUserReactions(session('userdata.id'), 'project', $currentProjectId, Reactions::$favorite);
         if ($userReaction && is_array($userReaction) && count($userReaction) > 0) {

@@ -2,6 +2,7 @@
 
 namespace Leantime\Domain\Setting\Controllers;
 
+use Leantime\Core\Configuration\Environment;
 use Leantime\Core\Controller\Controller;
 use Leantime\Core\Controller\Frontcontroller;
 use Leantime\Core\UI\Theme;
@@ -23,6 +24,8 @@ class EditCompanySettings extends Controller
 
     private Theme $theme;
 
+    private Environment $config;
+
     /**
      * constructor - initialize private variables
      */
@@ -31,6 +34,7 @@ class EditCompanySettings extends Controller
         ApiService $APIService,
         SettingService $settingsSvc,
         Theme $theme,
+        Environment $config,
 
     ) {
         Auth::authOrRedirect([Roles::$owner, Roles::$admin], true);
@@ -39,6 +43,7 @@ class EditCompanySettings extends Controller
         $this->APIService = $APIService;
         $this->settingsSvc = $settingsSvc;
         $this->theme = $theme;
+        $this->config = $config;
     }
 
     /**
@@ -64,7 +69,45 @@ class EditCompanySettings extends Controller
             'language' => session('companysettings.language'),
             'telemetryActive' => true,
             'messageFrequency' => '',
+            'microsoftAuth' => [
+                'enabled' => $this->config->oidcEnable,
+                'issuer' => $this->config->oidcProviderUrl,
+                'clientId' => $this->config->oidcClientId,
+                'allowPublicRegistration' => $this->config->oidcCreateUser,
+                'defaultRole' => $this->config->oidcDefaultRole,
+                'hasClientSecret' => ! empty($this->config->oidcClientSecret),
+            ],
         ];
+
+        $msEnabled = $this->settingsRepo->getSetting('companysettings.microsoftAuth.enabled');
+        if ($msEnabled !== false) {
+            $companySettings['microsoftAuth']['enabled'] = $this->toBool($msEnabled);
+        }
+
+        $msIssuer = $this->settingsRepo->getDecryptedSetting('companysettings.microsoftAuth.issuer');
+        if ($msIssuer !== false) {
+            $companySettings['microsoftAuth']['issuer'] = $msIssuer;
+        }
+
+        $msClientId = $this->settingsRepo->getDecryptedSetting('companysettings.microsoftAuth.clientId');
+        if ($msClientId !== false) {
+            $companySettings['microsoftAuth']['clientId'] = $msClientId;
+        }
+
+        $msAllowRegistration = $this->settingsRepo->getSetting('companysettings.microsoftAuth.allowPublicRegistration');
+        if ($msAllowRegistration !== false) {
+            $companySettings['microsoftAuth']['allowPublicRegistration'] = $this->toBool($msAllowRegistration);
+        }
+
+        $msDefaultRole = $this->settingsRepo->getSetting('companysettings.microsoftAuth.defaultRole');
+        if ($msDefaultRole !== false) {
+            $companySettings['microsoftAuth']['defaultRole'] = (int) $msDefaultRole;
+        }
+
+        $msClientSecret = $this->settingsRepo->getDecryptedSetting('companysettings.microsoftAuth.clientSecret');
+        if ($msClientSecret !== false) {
+            $companySettings['microsoftAuth']['hasClientSecret'] = ! empty($msClientSecret);
+        }
 
         $mainColor = $this->settingsRepo->getSetting('companysettings.mainColor');
         if ($mainColor !== false) {
@@ -190,6 +233,36 @@ class EditCompanySettings extends Controller
                 app()->make(ReportService::class)->optOutTelemetry();
             }
 
+            $microsoftAuthEnabled = isset($params['microsoftAuthEnabled']) ? 'true' : 'false';
+            $this->settingsRepo->saveSetting('companysettings.microsoftAuth.enabled', $microsoftAuthEnabled);
+
+            $microsoftIssuer = trim((string) ($params['microsoftAuthIssuer'] ?? ''));
+            $this->settingsRepo->saveEncryptedSetting('companysettings.microsoftAuth.issuer', $microsoftIssuer);
+
+            $microsoftClientId = trim((string) ($params['microsoftAuthClientId'] ?? ''));
+            $this->settingsRepo->saveEncryptedSetting('companysettings.microsoftAuth.clientId', $microsoftClientId);
+
+            $microsoftAllowRegistration = isset($params['microsoftAuthAllowPublicRegistration']) ? 'true' : 'false';
+            $this->settingsRepo->saveSetting(
+                'companysettings.microsoftAuth.allowPublicRegistration',
+                $microsoftAllowRegistration
+            );
+
+            $microsoftDefaultRole = (int) ($params['microsoftAuthDefaultRole'] ?? 20);
+            $validRoles = [5, 10, 20, 30, 40, 50];
+            if (! in_array($microsoftDefaultRole, $validRoles, true)) {
+                $microsoftDefaultRole = 20;
+            }
+            $this->settingsRepo->saveSetting('companysettings.microsoftAuth.defaultRole', $microsoftDefaultRole);
+
+            $microsoftClientSecret = trim((string) ($params['microsoftAuthClientSecret'] ?? ''));
+            if ($microsoftClientSecret !== '') {
+                $this->settingsRepo->saveEncryptedSetting(
+                    'companysettings.microsoftAuth.clientSecret',
+                    $microsoftClientSecret
+                );
+            }
+
             $this->tpl->setNotification($this->language->__('notifications.company_settings_edited_successfully'), 'success');
         }
 
@@ -205,4 +278,9 @@ class EditCompanySettings extends Controller
      * delete - handle delete requests
      */
     public function delete($params) {}
+
+    private function toBool(mixed $value): bool
+    {
+        return in_array(strtolower((string) $value), ['1', 'true', 'on', 'yes'], true);
+    }
 }

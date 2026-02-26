@@ -4,11 +4,15 @@ namespace Leantime\Domain\Setting\Repositories;
 
 use Exception;
 use Illuminate\Database\ConnectionInterface;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Log;
 use Leantime\Core\Db\Db as DbCore;
 use Leantime\Domain\Setting\Services\SettingCache;
 
 class Setting
 {
+    private const ENCRYPTED_PREFIX = 'enc::';
+
     private ConnectionInterface $db;
 
     private SettingCache $cache;
@@ -81,6 +85,36 @@ class Setting
         $this->cache->set($type, $value);
 
         return $return;
+    }
+
+    public function saveEncryptedSetting(string $type, mixed $value): bool
+    {
+        $encryptedValue = self::ENCRYPTED_PREFIX.Crypt::encryptString((string) $value);
+
+        return $this->saveSetting($type, $encryptedValue);
+    }
+
+    public function getDecryptedSetting(string $type, mixed $default = false): mixed
+    {
+        $value = $this->getSetting($type, $default);
+
+        if (! is_string($value) || $value === '') {
+            return $value;
+        }
+
+        if (! str_starts_with($value, self::ENCRYPTED_PREFIX)) {
+            return $value;
+        }
+
+        $encryptedPayload = substr($value, strlen(self::ENCRYPTED_PREFIX));
+
+        try {
+            return Crypt::decryptString($encryptedPayload);
+        } catch (\Throwable $e) {
+            Log::warning('Failed to decrypt company setting', ['key' => $type, 'error' => $e->getMessage()]);
+
+            return $default;
+        }
     }
 
     /**

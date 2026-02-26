@@ -2,7 +2,6 @@
 
 namespace Leantime\Domain\Notifications\Services;
 
-use Illuminate\Support\Facades\Log;
 use Leantime\Core\Db\Db as DbCore;
 use Leantime\Core\Language as LanguageCore;
 use Leantime\Domain\Notifications\Repositories\Notifications as NotificationRepository;
@@ -46,55 +45,13 @@ class News
 
     public function getLatest(int $userId): false|\SimpleXMLElement
     {
-        if (! env('LEAN_NEWS_ENABLED', true)) {
-            return false;
-        }
-
-        try {
-            $rss = $this->getFeed();
-        } catch (\Exception $e) {
-            Log::warning('Could not connect to news server.');
-            Log::warning($e);
-
-            return false;
-        }
-
-        $latestGuid = (string) $rss?->channel?->item[0]?->guid;
-        $this->settingService->saveSetting('usersettings.'.$userId.'.lastNewsGuid', strval($latestGuid));
-
-        // Todo: check last article the user read
-        // Only load rss feed once a day
-        return $rss;
+        // External update/news checks are disabled in this installation.
+        return false;
 
     }
 
     public function hasNews(int $userId): bool
     {
-        if (! env('LEAN_NEWS_ENABLED', true)) {
-            return false;
-        }
-
-        try {
-            $rss = $this->getFeed();
-        } catch (\Exception $e) {
-            Log::warning('Could not connect to news server.');
-            Log::warning($e);
-
-            return false;
-        }
-
-        $latestGuid = (string) $rss?->channel?->item[0]?->guid;
-
-        $lastNewsGuid = $this->settingService->getSetting('usersettings.'.$userId.'.lastNewsGuid');
-
-        if ($lastNewsGuid === false) {
-            return true;
-        }
-
-        if ($lastNewsGuid !== $latestGuid) {
-            return true;
-        }
-
         return false;
 
     }
@@ -110,19 +67,6 @@ class News
      */
     public function getFeed()
     {
-
-        $client = new \GuzzleHttp\Client;
-        $response = $client->request('GET', 'https://leantime.io/category/leantime-updates/feature-updates/feed/', [
-            'headers' => ['Accept' => 'application/xml'],
-            'timeout' => 5,
-        ])->getBody()->getContents();
-
-        if (function_exists('simplexml_load_string')) {
-            $responseXml = simplexml_load_string($response);
-        } else {
-            throw new \Exception('Simple XML extension is not installed');
-        }
-
-        return $responseXml;
+        return false;
     }
 }

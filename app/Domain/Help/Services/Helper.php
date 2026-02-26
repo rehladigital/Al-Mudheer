@@ -309,8 +309,8 @@ class Helper
             'milestone' => $milestoneId,
         ];
 
-        $values['headline'] = '💬 Join our community chat';
-        $values['description'] = 'Our community chat is a great resource to ask questions and get feedback on project set up. <a href="https://discord.gg/4zMzJtAq9z" target="_blank">Community Chat</a>';
+        $values['headline'] = '💬 Collaborate with your team';
+        $values['description'] = 'Use comments, mentions, and notifications inside Leantime to keep communication in one place.';
         $values['dateToFinish'] = dtHelper()->userNow()->addDays(1)->formatDateForUser();
         $ticketService->quickAddTicket($values);
 
@@ -322,8 +322,8 @@ class Helper
             $ticketService->quickAddTicket($values);
         }
 
-        $values['headline'] = '🎯 Learn More about Leantime\'s Project Structure';
-        $values['description'] = 'We have a lot of additional resources on our help documentation. To learn more about project structure in Leantime and best practices visit: <a href="https://support.leantime.io/en/article/getting-started-in-leantime-an-introduction-to-setting-structure-to-the-work-14t1qip/" target="_blank">https://help.leantime.io</a>';
+        $values['headline'] = '🎯 Learn More about Project Structure';
+        $values['description'] = 'Use the built-in onboarding and project templates to define your project setup and workflow.';
         $values['dateToFinish'] = dtHelper()->userNow()->addDays(1)->formatDateForUser();
         $ticketService->quickAddTicket($values);
 

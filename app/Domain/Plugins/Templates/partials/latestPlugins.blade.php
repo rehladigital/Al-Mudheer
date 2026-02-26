@@ -1,6 +1,6 @@
 
-<h1>Latest Plugin Updates</h1>
-<p>Extend Leantime using our latest plugins.<br /><a href="{{ BASE_URL }}/plugins/marketplace"><i class="fa fa-cogs"></i> Manage Your Apps</a></p><br />
+<h1>Plugin Updates Disabled</h1>
+<p>Marketplace access and latest plugin checks are disabled in this installation.</p><br />
 
 <br />
 <div>

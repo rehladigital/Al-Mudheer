@@ -118,8 +118,27 @@ class DatabaseHelper
             'mysql' => "DATE_FORMAT({$column}, '{$format}')",
             'pgsql' => "TO_CHAR({$column}, '{$this->convertDateFormatToPostgres($format)}')",
             'sqlsrv' => "FORMAT({$column}, '{$this->convertDateFormatToMsSql($format)}')",
+            'sqlite' => $this->formatDateForSqlite($column, $format),
             default => "DATE_FORMAT({$column}, '{$format}')", // fallback to MySQL syntax
         };
+    }
+
+    /**
+     * Generate SQLite-compatible date formatting SQL.
+     *
+     * SQLite uses strftime() and does not support MySQL DATE_FORMAT().
+     */
+    private function formatDateForSqlite(string $column, string $format): string
+    {
+        // Common Leantime timeline format where day should not be zero-padded.
+        if ($format === '%Y,%m,%e') {
+            return "strftime('%Y,%m', {$column}) || ',' || CAST(strftime('%d', {$column}) AS INTEGER)";
+        }
+
+        // Best-effort fallback for other format strings.
+        $sqliteFormat = str_replace('%e', '%d', $format);
+
+        return "strftime('{$sqliteFormat}', {$column})";
     }
 
     /**

@@ -196,6 +196,132 @@ foreach ($relevanceLevels as $level => $labelKey) { ?>
                                             </div>
                                         </div>
                                     </div>
+
+                                    <br />
+                                    <h4 class="widgettitle title-light"><span
+                                            class="fa-brands fa-microsoft"></span><?php echo $tpl->__('subtitles.microsoft_authentication'); ?>
+                                    </h4>
+                                    <p><?php echo $tpl->__('text.microsoft_authentication_helper'); ?></p>
+
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <label for="microsoftAuthEnabled"><?php echo $tpl->__('label.enable_microsoft_authentication'); ?></label>
+                                        </div>
+                                        <div class="col-md-7">
+                                            <label class="checkbox-inline" for="microsoftAuthEnabled" style="padding-left:0;">
+                                                <input type="checkbox"
+                                                       id="microsoftAuthEnabled"
+                                                       name="microsoftAuthEnabled"
+                                                       value="1"
+                                                    <?php if (! empty($companySettings['microsoftAuth']['enabled'])) {
+                                                        echo 'checked="checked"';
+                                                    } ?>
+                                                />
+                                                <?php echo $tpl->__('label.enabled'); ?>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <label for="microsoftAuthIssuer"><?php echo $tpl->__('label.microsoft_issuer'); ?></label>
+                                        </div>
+                                        <div class="col-md-7">
+                                            <input type="text"
+                                                   id="microsoftAuthIssuer"
+                                                   name="microsoftAuthIssuer"
+                                                   value="<?php echo $tpl->escape($companySettings['microsoftAuth']['issuer'] ?? ''); ?>"
+                                                   class="pull-left"
+                                                   style="width:100%;"
+                                                   placeholder="https://login.microsoftonline.com/your-tenant-id/v2.0" />
+                                            <small><?php echo $tpl->__('text.microsoft_issuer_example'); ?></small>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <label for="microsoftAuthClientId"><?php echo $tpl->__('label.microsoft_client_id'); ?></label>
+                                        </div>
+                                        <div class="col-md-7">
+                                            <input type="text"
+                                                   id="microsoftAuthClientId"
+                                                   name="microsoftAuthClientId"
+                                                   value="<?php echo $tpl->escape($companySettings['microsoftAuth']['clientId'] ?? ''); ?>"
+                                                   class="pull-left"
+                                                   style="width:100%;"
+                                                   placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" />
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <label for="microsoftAuthClientSecret"><?php echo $tpl->__('label.microsoft_client_secret'); ?></label>
+                                        </div>
+                                        <div class="col-md-7">
+                                            <input type="password"
+                                                   id="microsoftAuthClientSecret"
+                                                   name="microsoftAuthClientSecret"
+                                                   value=""
+                                                   class="pull-left"
+                                                   style="width:100%;"
+                                                   autocomplete="off" />
+                                            <small>
+                                                <?php
+                                                echo ! empty($companySettings['microsoftAuth']['hasClientSecret'])
+                                                    ? $tpl->__('text.microsoft_client_secret_set')
+                                                    : $tpl->__('text.microsoft_client_secret_not_set');
+?>
+                                            </small>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <label for="microsoftAuthAllowPublicRegistration"><?php echo $tpl->__('label.microsoft_allow_public_registration'); ?></label>
+                                        </div>
+                                        <div class="col-md-7">
+                                            <label class="checkbox-inline" for="microsoftAuthAllowPublicRegistration" style="padding-left:0;">
+                                                <input type="checkbox"
+                                                       id="microsoftAuthAllowPublicRegistration"
+                                                       name="microsoftAuthAllowPublicRegistration"
+                                                       value="1"
+                                                    <?php if (! empty($companySettings['microsoftAuth']['allowPublicRegistration'])) {
+                                                        echo 'checked="checked"';
+                                                    } ?>
+                                                />
+                                                <?php echo $tpl->__('label.enabled'); ?>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <label for="microsoftAuthDefaultRole"><?php echo $tpl->__('label.microsoft_default_role'); ?></label>
+                                        </div>
+                                        <div class="col-md-7">
+                                            <select id="microsoftAuthDefaultRole" name="microsoftAuthDefaultRole" style="max-width:300px;">
+                                                <option value="5" <?php if (($companySettings['microsoftAuth']['defaultRole'] ?? 20) == 5) {
+                                                    echo 'selected';
+                                                } ?>>Readonly</option>
+                                                <option value="10" <?php if (($companySettings['microsoftAuth']['defaultRole'] ?? 20) == 10) {
+                                                    echo 'selected';
+                                                } ?>>Commenter</option>
+                                                <option value="20" <?php if (($companySettings['microsoftAuth']['defaultRole'] ?? 20) == 20) {
+                                                    echo 'selected';
+                                                } ?>>Editor</option>
+                                                <option value="30" <?php if (($companySettings['microsoftAuth']['defaultRole'] ?? 20) == 30) {
+                                                    echo 'selected';
+                                                } ?>>Manager</option>
+                                                <option value="40" <?php if (($companySettings['microsoftAuth']['defaultRole'] ?? 20) == 40) {
+                                                    echo 'selected';
+                                                } ?>>Admin</option>
+                                                <option value="50" <?php if (($companySettings['microsoftAuth']['defaultRole'] ?? 20) == 50) {
+                                                    echo 'selected';
+                                                } ?>>Owner</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
                                     <input type="submit" value="<?= $tpl->__('buttons.save')?>" id="saveBtn"/>
                                 </form>
                             </div>

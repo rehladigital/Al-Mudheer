@@ -20,7 +20,7 @@ class Modulemanager
         'dashboard' => ['required' => true, 'enabled' => true, 'dependsOn' => '', 'scope' => 'project'],
         'files' => ['required' => false, 'enabled' => true, 'dependsOn' => '', 'scope' => 'project'],
         'general' => ['required' => true, 'enabled' => true, 'dependsOn' => '', 'scope' => 'system'],
-        'help' => ['required' => false, 'enabled' => true, 'dependsOn' => '', 'scope' => 'project'],
+        'help' => ['required' => false, 'enabled' => false, 'dependsOn' => '', 'scope' => 'project'],
         'ideas' => ['required' => false, 'enabled' => true, 'dependsOn' => '', 'scope' => 'project'],
         'ldap' => ['required' => false, 'enabled' => true, 'dependsOn' => '', 'scope' => 'system'],
         'leancanvas' => ['required' => false, 'enabled' => true, 'dependsOn' => '', 'scope' => 'project'],

@@ -23,8 +23,21 @@ class Callback extends Controller
      */
     public function get($params): Response
     {
-        $code = $_GET['code'];
-        $state = $_GET['state'];
+        if (isset($_GET['error'])) {
+            $errorDescription = $_GET['error_description'] ?? $_GET['error'];
+            $this->tpl->setNotification($errorDescription, 'danger', 'oidc_error');
+
+            return Frontcontroller::redirect(BASE_URL.'/auth/login');
+        }
+
+        $code = $_GET['code'] ?? null;
+        $state = $_GET['state'] ?? null;
+
+        if (! $code || ! $state) {
+            $this->tpl->setNotification('OIDC callback did not contain the expected response data.', 'danger', 'oidc_error');
+
+            return Frontcontroller::redirect(BASE_URL.'/auth/login');
+        }
 
         try {
             return $this->oidc->callback($code, $state);

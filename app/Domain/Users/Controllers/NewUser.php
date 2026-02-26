@@ -3,10 +3,12 @@
 namespace Leantime\Domain\Users\Controllers;
 
 use Leantime\Core\Controller\Controller;
+use Leantime\Core\Configuration\Environment;
 use Leantime\Domain\Auth\Models\Roles;
 use Leantime\Domain\Auth\Services\Auth;
 use Leantime\Domain\Clients\Repositories\Clients as ClientRepository;
 use Leantime\Domain\Projects\Repositories\Projects as ProjectRepository;
+use Leantime\Domain\Setting\Services\Setting;
 use Leantime\Domain\Users\Repositories\Users as UserRepository;
 use Leantime\Domain\Users\Services\Users as UserService;
 
@@ -18,17 +20,25 @@ class NewUser extends Controller
 
     private UserService $userService;
 
+    private Setting $settingService;
+
+    private Environment $config;
+
     /**
      * init - initialize private variables
      */
     public function init(
         UserRepository $userRepo,
         ProjectRepository $projectsRepo,
-        UserService $userService
+        UserService $userService,
+        Setting $settingService,
+        Environment $config
     ) {
         $this->userRepo = $userRepo;
         $this->projectsRepo = $projectsRepo;
         $this->userService = $userService;
+        $this->settingService = $settingService;
+        $this->config = $config;
     }
 
     /**
@@ -37,6 +47,19 @@ class NewUser extends Controller
     public function run()
     {
         Auth::authOrRedirect([Roles::$owner, Roles::$admin, Roles::$manager], true);
+
+        $oidcEnabled = $this->settingService->getSetting('companysettings.microsoftAuth.enabled');
+        if ($oidcEnabled === false) {
+            $oidcEnabled = $this->config->oidcEnable;
+        } else {
+            $oidcEnabled = in_array(strtolower((string) $oidcEnabled), ['1', 'true', 'on', 'yes'], true);
+        }
+
+        if ($oidcEnabled) {
+            $this->tpl->setNotification('Inviting users is disabled while Microsoft SSO is enabled.', 'error');
+
+            return $this->tpl->displayPartial('errors.error403');
+        }
 
         $values = [
             'firstname' => '',

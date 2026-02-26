@@ -76,7 +76,7 @@ class Theme
      *
      * @final
      */
-    public const DEFAULT_LOGO = '/dist/images/logo.svg';
+    public const DEFAULT_LOGO = '/assets/images/logo.png';
 
     /**
      * Theme style customization file (excluding .css extension)

@@ -11,6 +11,7 @@ use Leantime\Core\Configuration\Environment;
 use Leantime\Core\Controller\Frontcontroller;
 use Leantime\Core\Language;
 use Leantime\Domain\Auth\Services\Auth as AuthService;
+use Leantime\Domain\Setting\Repositories\Setting as SettingRepository;
 use Leantime\Domain\Users\Repositories\Users as UserRepository;
 use OpenSSLAsymmetricKey;
 use phpseclib3\Crypt\PublicKeyLoader;
@@ -71,23 +72,36 @@ class Oidc
 
     private Language $language;
 
+    private SettingRepository $settingsRepo;
+
     public function __construct(
         Environment $config,
         Language $language,
         AuthService $authService,
-        UserRepository $userRepo
+        UserRepository $userRepo,
+        SettingRepository $settingsRepo
     ) {
         $this->config = $config;
         $this->authService = $authService;
         $this->userRepo = $userRepo;
         $this->language = $language;
+        $this->settingsRepo = $settingsRepo;
 
-        $providerUrl = $this->config->get('oidcProviderUrl');
+        $providerUrl = $this->settingsRepo->getDecryptedSetting('companysettings.microsoftAuth.issuer');
+        if ($providerUrl === false || $providerUrl === '') {
+            $providerUrl = $this->config->get('oidcProviderUrl');
+        }
 
         $this->providerUrl = ! empty($providerUrl) ? $this->trimTrailingSlash($providerUrl) : $providerUrl;
         $this->autoDiscoverUrl = $this->config->get('oidcAutoDiscoverUrl', '');
-        $this->clientId = $this->config->get('oidcClientId', '');
-        $this->clientSecret = $this->config->get('oidcClientSecret', '');
+        $this->clientId = $this->settingsRepo->getDecryptedSetting('companysettings.microsoftAuth.clientId');
+        if ($this->clientId === false || $this->clientId === '') {
+            $this->clientId = $this->config->get('oidcClientId', '');
+        }
+        $this->clientSecret = $this->settingsRepo->getDecryptedSetting('companysettings.microsoftAuth.clientSecret');
+        if ($this->clientSecret === false || $this->clientSecret === '') {
+            $this->clientSecret = $this->config->get('oidcClientSecret', '');
+        }
         $this->authUrl = $this->config->get('oidcAuthUrl', '');
         $this->tokenUrl = $this->config->get('oidcTokenUrl', '');
         $this->jwksUrl = $this->config->get('oidcJwksUrl', '');
@@ -95,8 +109,18 @@ class Oidc
         $this->certificateString = $this->config->get('oidcCertificateString', '');
         $this->certificateFile = $this->config->get('oidcCertificateFile', '');
         $this->scopes = $this->config->get('oidcScopes', '');
-        $this->createUser = $this->config->get('oidcCreateUser', false);
-        $this->defaultRole = $this->config->get('oidcDefaultRole', 20);
+        $allowPublicRegistration = $this->settingsRepo->getSetting('companysettings.microsoftAuth.allowPublicRegistration');
+        if ($allowPublicRegistration === false) {
+            $this->createUser = $this->config->get('oidcCreateUser', false);
+        } else {
+            $this->createUser = in_array(strtolower((string) $allowPublicRegistration), ['1', 'true', 'on', 'yes'], true);
+        }
+        $defaultRole = $this->settingsRepo->getSetting('companysettings.microsoftAuth.defaultRole');
+        if ($defaultRole === false || $defaultRole === '') {
+            $this->defaultRole = $this->config->get('oidcDefaultRole', 20);
+        } else {
+            $this->defaultRole = (int) $defaultRole;
+        }
 
         $this->fieldEmail = $this->config->get('oidcFieldEmail', '');
         $this->fieldFirstName = $this->config->get('oidcFieldFirstName', '');

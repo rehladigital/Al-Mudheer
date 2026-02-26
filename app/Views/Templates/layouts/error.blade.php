@@ -3,7 +3,7 @@
 <head>
     @include('global::sections.header')
     <style>
-        .leantimeLogo { position: fixed; bottom: 10px; right: 10px; }
+        .brandLogo { position: fixed; bottom: 10px; right: 10px; }
     </style>
     @stack('styles')
 </head>
@@ -12,7 +12,7 @@
 
 <div class="header hidden-gt-sm tw-p-[10px]" style="background:var(--header-gradient)">
     <a href="{!! BASE_URL !!}" target="_blank">
-        <img src="{{ BASE_URL }}/dist/images/logo.svg" class="tw-h-full "/>
+        <img src="{{ BASE_URL }}/assets/images/logo.png" class="tw-h-full "/>
     </a>
 </div>
 
@@ -20,7 +20,7 @@
     <div class="col-md-4 hidden-phone regLeft">
 
         <div class="logo">
-            <a href="{!! BASE_URL !!}" target="_blank"><img src="{{ BASE_URL }}/dist/images/logo.svg" /></a>
+            <a href="{!! BASE_URL !!}" target="_blank"><img src="{{ BASE_URL }}/assets/images/logo.png" /></a>
         </div>
 
         <div class="welcomeContent">
@@ -43,8 +43,8 @@
         </div>
 
     </div>
-    <div class="leantimeLogo">
-        <img style="height: 25px;" src="{!! BASE_URL !!}/dist/images/logo-powered-by-leantime.png">
+    <div class="brandLogo">
+        <img style="height: 25px;" src="{!! BASE_URL !!}/assets/images/logo.png">
     </div>
 </div>
 

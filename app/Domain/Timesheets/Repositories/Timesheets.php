@@ -339,6 +339,7 @@ class Timesheets extends Repository
         $dateFormatSql = match ($this->dbHelper->getDriverName()) {
             'mysql' => "DATE_FORMAT(zp_timesheets.{$wrappedWorkDate}, '%Y-%m-%d')",
             'pgsql' => "TO_CHAR(zp_timesheets.{$wrappedWorkDate}, 'YYYY-MM-DD')",
+            'sqlite' => "strftime('%Y-%m-%d', zp_timesheets.{$wrappedWorkDate})",
             default => "DATE_FORMAT(zp_timesheets.{$wrappedWorkDate}, '%Y-%m-%d')",
         };
 
@@ -398,6 +399,7 @@ class Timesheets extends Repository
         $monthSql = match ($this->dbHelper->getDriverName()) {
             'mysql' => "MONTH(zp_timesheets.{$wrappedWorkDate})",
             'pgsql' => "EXTRACT(MONTH FROM zp_timesheets.{$wrappedWorkDate})::integer",
+            'sqlite' => "CAST(strftime('%m', zp_timesheets.{$wrappedWorkDate}) AS INTEGER)",
             default => "MONTH(zp_timesheets.{$wrappedWorkDate})",
         };
 
@@ -431,6 +433,24 @@ class Timesheets extends Repository
                         TO_CHAR(zp_timesheets.{$wrappedWorkDate}, 'YYYY-MM-DD') AS utc,
                         TO_CHAR(zp_timesheets.{$wrappedWorkDate}, 'Month') AS {$wrappedMonthName},
                         TO_CHAR(zp_timesheets.{$wrappedWorkDate}, 'MM') AS month",
+            'sqlite' => "CAST(strftime('%Y', zp_timesheets.{$wrappedWorkDate}) AS INTEGER) AS year,
+                        strftime('%Y-%m-%d', zp_timesheets.{$wrappedWorkDate}) AS utc,
+                        CASE strftime('%m', zp_timesheets.{$wrappedWorkDate})
+                            WHEN '01' THEN 'January'
+                            WHEN '02' THEN 'February'
+                            WHEN '03' THEN 'March'
+                            WHEN '04' THEN 'April'
+                            WHEN '05' THEN 'May'
+                            WHEN '06' THEN 'June'
+                            WHEN '07' THEN 'July'
+                            WHEN '08' THEN 'August'
+                            WHEN '09' THEN 'September'
+                            WHEN '10' THEN 'October'
+                            WHEN '11' THEN 'November'
+                            WHEN '12' THEN 'December'
+                            ELSE ''
+                        END AS {$wrappedMonthName},
+                        strftime('%m', zp_timesheets.{$wrappedWorkDate}) AS month",
             default => "YEAR(zp_timesheets.{$wrappedWorkDate}) AS year,
                         DATE_FORMAT(zp_timesheets.{$wrappedWorkDate}, '%Y-%m-%d') AS utc,
                         DATE_FORMAT(zp_timesheets.{$wrappedWorkDate}, '%M') AS {$wrappedMonthName},
@@ -440,6 +460,7 @@ class Timesheets extends Repository
         $groupBySql = match ($this->dbHelper->getDriverName()) {
             'mysql' => "DATE_FORMAT(zp_timesheets.{$wrappedWorkDate}, '%Y-%m-%d')",
             'pgsql' => "TO_CHAR(zp_timesheets.{$wrappedWorkDate}, 'YYYY-MM-DD')",
+            'sqlite' => "strftime('%Y-%m-%d', zp_timesheets.{$wrappedWorkDate})",
             default => "DATE_FORMAT(zp_timesheets.{$wrappedWorkDate}, '%Y-%m-%d')",
         };
 
@@ -507,6 +528,24 @@ class Timesheets extends Repository
                         TO_CHAR(zp_timesheets.{$wrappedWorkDate}, 'YYYY-MM-DD') AS utc,
                         TO_CHAR(zp_timesheets.{$wrappedWorkDate}, 'Month') AS {$wrappedMonthName},
                         TO_CHAR(zp_timesheets.{$wrappedWorkDate}, 'MM') AS month",
+            'sqlite' => "CAST(strftime('%Y', zp_timesheets.{$wrappedWorkDate}) AS INTEGER) AS year,
+                        strftime('%Y-%m-%d', zp_timesheets.{$wrappedWorkDate}) AS utc,
+                        CASE strftime('%m', zp_timesheets.{$wrappedWorkDate})
+                            WHEN '01' THEN 'January'
+                            WHEN '02' THEN 'February'
+                            WHEN '03' THEN 'March'
+                            WHEN '04' THEN 'April'
+                            WHEN '05' THEN 'May'
+                            WHEN '06' THEN 'June'
+                            WHEN '07' THEN 'July'
+                            WHEN '08' THEN 'August'
+                            WHEN '09' THEN 'September'
+                            WHEN '10' THEN 'October'
+                            WHEN '11' THEN 'November'
+                            WHEN '12' THEN 'December'
+                            ELSE ''
+                        END AS {$wrappedMonthName},
+                        strftime('%m', zp_timesheets.{$wrappedWorkDate}) AS month",
             default => "YEAR(zp_timesheets.{$wrappedWorkDate}) AS year,
                         DATE_FORMAT(zp_timesheets.{$wrappedWorkDate}, '%Y-%m-%d') AS utc,
                         DATE_FORMAT(zp_timesheets.{$wrappedWorkDate}, '%M') AS {$wrappedMonthName},
@@ -516,6 +555,7 @@ class Timesheets extends Repository
         $groupBySql = match ($this->dbHelper->getDriverName()) {
             'mysql' => "DATE_FORMAT(zp_timesheets.{$wrappedWorkDate}, '%Y-%m-%d')",
             'pgsql' => "TO_CHAR(zp_timesheets.{$wrappedWorkDate}, 'YYYY-MM-DD')",
+            'sqlite' => "strftime('%Y-%m-%d', zp_timesheets.{$wrappedWorkDate})",
             default => "DATE_FORMAT(zp_timesheets.{$wrappedWorkDate}, '%Y-%m-%d')",
         };
 
