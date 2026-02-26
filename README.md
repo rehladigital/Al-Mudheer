@@ -47,6 +47,16 @@ Website: [https://rehladigital.com](https://rehladigital.com)
 3. Point web root to `public/`
 4. Open `/install` and complete setup
 
+## Hostinger deployment
+
+- Deployment source path: `/home/<user>/domains/<domain>/public_html/<app-folder>`
+- Domain URL: `https://<your-domain>`
+- Document root for the domain/subdomain: `/home/<user>/domains/<domain>/public_html/<app-folder>/public`
+- Keep runtime environment file at:
+  - `/home/<user>/domains/<domain>/public_html/<app-folder>/.env`
+  - or `/home/<user>/domains/<domain>/public_html/<app-folder>/config/.env`
+- Required app URL value in env: `LEAN_APP_URL=https://<your-domain>`
+
 ## Setup helper files
 
 - `composer.phar`: local Composer binary included for environments without a global Composer install.
