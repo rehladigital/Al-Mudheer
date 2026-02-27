@@ -1,6 +1,6 @@
 param(
     [Parameter(Mandatory = $true)]
-    [string]$Host,
+    [string]$SftpHost,
 
     [Parameter(Mandatory = $true)]
     [int]$Port,
@@ -22,10 +22,12 @@ $ErrorActionPreference = "Stop"
 $resolvedSource = (Resolve-Path $SourcePath).Path
 $scriptPath = Join-Path $env:TEMP "winscp-safe-sync-$(Get-Date -Format 'yyyyMMddHHmmss').txt"
 
+$escapedPassword = [uri]::EscapeDataString($Password)
+
 $winScpScript = @"
 option batch abort
 option confirm off
-open sftp://$User:$([uri]::EscapeDataString($Password))@$Host:$Port/ -hostkey=*
+open sftp://$($User):$($escapedPassword)@$($SftpHost):$($Port)/ -hostkey=*
 synchronize remote -criteria=time -transfer=binary -filemask="|.git/;.idea/;node_modules/;vendor/;storage/;userfiles/;config/.env;*.log;*.sqlite;*.db;*.db-journal" "$resolvedSource" "$RemotePath"
 exit
 "@
