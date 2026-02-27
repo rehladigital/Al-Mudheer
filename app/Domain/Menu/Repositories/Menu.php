@@ -95,6 +95,7 @@ class Menu
         'personal' => [
             5 => ['type' => 'item', 'module' => 'dashboard', 'title' => 'menu.sidemenu_home', 'icon' => 'fa fa-house', 'tooltip' => 'menu.overview_tooltip', 'href' => '/dashboard/home', 'active' => ['home']],
             6 => ['type' => 'item', 'module' => 'dashboard', 'title' => 'menu.sidemenu_non_visual_desktop', 'icon' => 'fa fa-list', 'tooltip' => 'menu.sidemenu_non_visual_desktop_tooltip', 'href' => '/dashboard/nonVisualDesktop', 'active' => ['nonVisualDesktop'], 'role' => 'readonly', 'requiresSetting' => 'nonVisualDesktop'],
+            6.5 => ['type' => 'item', 'module' => 'dashboard', 'title' => 'menu.sidemenu_department_assignments', 'icon' => 'fa fa-sitemap', 'tooltip' => 'menu.sidemenu_department_assignments_tooltip', 'href' => '/dashboard/departmentAssignments', 'active' => ['departmentAssignments'], 'role' => 'manager'],
             7 => ['type' => 'item', 'module' => 'projects', 'title' => 'menu.sidemenu_my_project_hub', 'icon' => 'fa fa-solid fa-house-flag', 'tooltip' => 'menu.projecthub_tooltip', 'href' => '/projects/showMy', 'active' => ['showMy'], 'role' => 'editor'],
             15 => ['type' => 'item', 'module' => 'timesheets', 'role' => 'owner', 'title' => 'menu.sidemenu_my_timesheets', 'icon' => 'fa-clock', 'tooltip' => 'menu.my_timesheets_tooltip', 'href' => '/timesheets/showMy', 'active' => ['showMy']],
             20 => ['type' => 'item', 'module' => 'calendar', 'title' => 'menu.sidemenu_my_calendar', 'icon' => 'fa fa-calendar', 'tooltip' => 'menu.my_calendar_tooltip', 'href' => '/calendar/showMyCalendar', 'active' => ['showMyCalendar']],
@@ -118,6 +119,7 @@ class Menu
                 'submenu' => [
                     10 => ['type' => 'item', 'module' => 'connector', 'title' => 'menu.integrations', 'icon' => 'fa fa-fw fa-circle-nodes', 'tooltip' => 'menu.connector_tooltip', 'href' => '/connector/show', 'active' => ['show']],
                     15 => ['type' => 'item', 'module' => 'setting', 'title' => 'menu.company_settings', 'icon' => 'fa fa-fw fa-cogs', 'tooltip' => 'menu.company_settings_tooltip', 'href' => '/setting/editCompanySettings', 'active' => ['editCompanySettings']],
+                    20 => ['type' => 'item', 'module' => 'setting', 'title' => 'menu.organization_roles', 'icon' => 'fa fa-fw fa-sitemap', 'tooltip' => 'menu.organization_roles_tooltip', 'href' => '/setting/organizationRoles', 'active' => ['organizationRoles']],
 
                 ],
             ],
@@ -429,6 +431,7 @@ class Menu
         $sections = [
             'dashboard.home' => 'personal',
             'dashboard.nonVisualDesktop' => 'personal',
+            'dashboard.departmentAssignments' => 'personal',
             'projects.showMy' => 'personal',
             'tickets.showKanban' => 'personal',
             'timesheets.showMy' => 'personal',
@@ -440,6 +443,7 @@ class Menu
             'tickets.showAllMilestonesOverview' => 'personal',
             'users.editOwn' => 'personal',
             'setting.editCompanySettings' => 'company',
+            'setting.organizationRoles' => 'company',
             'timesheets.showAll' => 'company',
             'projects.showAll' => 'company',
             'clients.showAll' => 'company',

@@ -6,6 +6,7 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Support\Facades\Log;
 use Leantime\Core\Configuration\Environment;
 use Leantime\Core\Events\DispatchesEvents;
+use Leantime\Domain\Setting\Repositories\Setting as SettingRepository;
 use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\PHPMailer;
 
@@ -56,8 +57,34 @@ class Mailer
      */
     public function __construct(Environment $config, Language $language)
     {
-        if ($config->email != '') {
-            $this->emailDomain = $config->email;
+        $smtpEnabled = filter_var($config->useSMTP, FILTER_VALIDATE_BOOLEAN);
+        $smtpAuth = isset($config->smtpAuth) ? filter_var($config->smtpAuth, FILTER_VALIDATE_BOOLEAN) : true;
+        $smtpAutoTls = $config->smtpAutoTLS ?? true;
+        $smtpSecure = (string) ($config->smtpSecure ?? '');
+        $smtpHost = (string) ($config->smtpHosts ?? '');
+        $smtpPort = (int) ($config->smtpPort ?? 25);
+        $smtpUsername = (string) ($config->smtpUsername ?? '');
+        $smtpPassword = (string) ($config->smtpPassword ?? '');
+        $fromEmail = (string) ($config->email ?? '');
+
+        try {
+            /** @var SettingRepository $settingsRepo */
+            $settingsRepo = app()->make(SettingRepository::class);
+            $smtpEnabled = $this->toBool((string) $settingsRepo->getSetting('companysettings.smtp.enabled', $smtpEnabled ? 'true' : 'false'));
+            $smtpAuth = $this->toBool((string) $settingsRepo->getSetting('companysettings.smtp.auth', $smtpAuth ? 'true' : 'false'));
+            $smtpAutoTls = $this->toBool((string) $settingsRepo->getSetting('companysettings.smtp.autoTls', $smtpAutoTls ? 'true' : 'false'));
+            $smtpSecure = (string) ($settingsRepo->getSetting('companysettings.smtp.secure', $smtpSecure) ?? $smtpSecure);
+            $smtpPort = (int) ($settingsRepo->getSetting('companysettings.smtp.port', (string) $smtpPort) ?? $smtpPort);
+            $smtpHost = (string) ($settingsRepo->getDecryptedSetting('companysettings.smtp.host', $smtpHost) ?? $smtpHost);
+            $smtpUsername = (string) ($settingsRepo->getDecryptedSetting('companysettings.smtp.username', $smtpUsername) ?? $smtpUsername);
+            $smtpPassword = (string) ($settingsRepo->getDecryptedSetting('companysettings.smtp.password', $smtpPassword) ?? $smtpPassword);
+            $fromEmail = (string) ($settingsRepo->getDecryptedSetting('companysettings.smtp.fromEmail', $fromEmail) ?? $fromEmail);
+        } catch (\Throwable $e) {
+            // During install/upgrade, settings storage may not be ready. Fall back to environment config.
+        }
+
+        if ($fromEmail != '') {
+            $this->emailDomain = $fromEmail;
         } else {
             $host = $_SERVER['HTTP_HOST'] ?? 'leantime';
             $this->emailDomain = 'no-reply@'.$host;
@@ -70,7 +97,7 @@ class Mailer
 
         $this->mailAgent->CharSet = 'UTF-8';                    // Ensure UTF-8 is used for emails
         // Use SMTP or php mail().
-        if (filter_var($config->useSMTP, FILTER_VALIDATE_BOOLEAN) === true) {
+        if ($smtpEnabled === true) {
             if ($config->debug) {
                 $this->mailAgent->SMTPDebug = 4;                // ensure all aspects (connection, TLS, SMTP, etc) are covered
                 $this->mailAgent->Debugoutput = function ($str, $level) {
@@ -84,19 +111,13 @@ class Mailer
             $this->mailAgent->Timeout = 20;
 
             $this->mailAgent->isSMTP();                                      // Set mailer to use SMTP
-            $this->mailAgent->Host = $config->smtpHosts;          // Specify main and backup SMTP servers
-
-            if (isset($config->smtpAuth)) {
-                $this->mailAgent->SMTPAuth = filter_var($config->smtpAuth, FILTER_VALIDATE_BOOLEAN);             // Enable SMTP user/password authentication
-            } else {
-                $this->mailAgent->SMTPAuth = true;
-            }
-
-            $this->mailAgent->Username = $config->smtpUsername;                 // SMTP username
-            $this->mailAgent->Password = $config->smtpPassword;                           // SMTP password
-            $this->mailAgent->SMTPAutoTLS = $config->smtpAutoTLS ?? true;                 // Enable TLS encryption automatically if a server supports it
-            $this->mailAgent->SMTPSecure = $config->smtpSecure;                            // Enable TLS encryption, `ssl` also accepted
-            $this->mailAgent->Port = (int) $config->smtpPort;                                    // TCP port to connect to
+            $this->mailAgent->Host = $smtpHost;          // Specify main and backup SMTP servers
+            $this->mailAgent->SMTPAuth = $smtpAuth;      // Enable SMTP user/password authentication
+            $this->mailAgent->Username = $smtpUsername;  // SMTP username
+            $this->mailAgent->Password = $smtpPassword;  // SMTP password
+            $this->mailAgent->SMTPAutoTLS = $smtpAutoTls; // Enable TLS encryption automatically if a server supports it
+            $this->mailAgent->SMTPSecure = $smtpSecure;  // Enable TLS encryption, `ssl` also accepted
+            $this->mailAgent->Port = $smtpPort;          // TCP port to connect to
             if (isset($config->smtpSSLNoverify) && filter_var($config->smtpSSLNoverify, FILTER_VALIDATE_BOOLEAN) === true) {     // If enabled, don't verify certifcates: accept self-signed or expired certs.
                 $this->mailAgent->SMTPOptions = [
                     'ssl' => [
@@ -114,6 +135,11 @@ class Mailer
         $this->companyColor = ! session()->has('companysettings.primarycolor') ? '#006c9e' : session('companysettings.primarycolor');
 
         $this->language = $language;
+    }
+
+    private function toBool(string $value): bool
+    {
+        return in_array(strtolower(trim($value)), ['1', 'true', 'yes', 'on'], true);
     }
 
     /**

@@ -57,8 +57,8 @@ expect_redirect_contains() {
 echo "==> Running deployment checklist for ${SITE_URL}"
 
 expect_code "${SITE_URL}/auth/login?advanced=1" "200"
-expect_code "${SITE_URL}/dist/css/main.3.7.1.min.css" "200"
-expect_code "${SITE_URL}/dist/js/compiled-frameworks.3.7.1.min.js" "200"
+expect_code "${SITE_URL}/dist/css/main.2.0.0.min.css" "200"
+expect_code "${SITE_URL}/dist/js/compiled-frameworks.2.0.0.min.js" "200"
 
 OIDC_EXPECT_CONTAINS="${OIDC_EXPECT_CONTAINS:-login.microsoftonline.com}"
 expect_redirect_contains "${SITE_URL}/oidc/login" "${OIDC_EXPECT_CONTAINS}"

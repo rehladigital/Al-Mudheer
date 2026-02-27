@@ -2455,18 +2455,14 @@ class Install
                 if (! Schema::hasTable($index['table'])) {
                     continue;
                 }
-
-                // Check if index already exists before adding
-                $existingIndexes = collect(
-                    $this->connection->select("SHOW INDEX FROM `{$index['table']}`")
-                )->pluck('Key_name')->unique()->toArray();
-
-                if (! in_array($index['name'], $existingIndexes)) {
-                    Schema::table($index['table'], function (Blueprint $table) use ($index) {
-                        $table->index($index['columns'], $index['name']);
-                    });
-                }
+                Schema::table($index['table'], function (Blueprint $table) use ($index) {
+                    $table->index($index['columns'], $index['name']);
+                });
             } catch (\Exception $e) {
+                $message = strtolower($e->getMessage());
+                if (str_contains($message, 'duplicate') || str_contains($message, 'already exists')) {
+                    continue;
+                }
                 Log::error("Migration 30500: Failed to add index {$index['name']} on {$index['table']}: ".$e->getMessage());
             }
         }

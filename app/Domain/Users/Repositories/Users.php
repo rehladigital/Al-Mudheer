@@ -254,6 +254,36 @@ class Users
         return array_map(fn ($item) => (array) $item, $results->toArray());
     }
 
+    public function getAllByDepartment(string $department, bool $activeOnly = true): array
+    {
+        $query = $this->connection->table('zp_user')
+            ->select([
+                'id',
+                'lastname',
+                'firstname',
+                'role',
+                'status',
+                'username',
+                'department',
+                'jobTitle',
+                'modified',
+            ])
+            ->whereRaw('LOWER(COALESCE(department, "")) = ?', [mb_strtolower(trim($department))])
+            ->where(function ($q) {
+                $q->whereNull('source')
+                    ->orWhere('source', '!=', 'api');
+            })
+            ->orderBy('lastname');
+
+        if ($activeOnly) {
+            $query->where('status', 'a');
+        }
+
+        $results = $query->get();
+
+        return array_map(fn ($item) => (array) $item, $results->toArray());
+    }
+
     /**
      * getAll - get all user
      */

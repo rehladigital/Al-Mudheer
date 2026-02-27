@@ -15,7 +15,7 @@ Acknowledgement: This project is built based on the Leantime open-source project
 
 - **Production runtime:** PHP app from repository root (this is the complete app with full theme and modules).
 - **Node migration track:** preserved under `node-migration/` for future modernization work; it is not the active production path.
-- **Release target:** `1.0.0` tag on `main`.
+- **Release target:** `2.0.0` tag on `main`.
 
 ## About Rehla Digital
 
@@ -80,14 +80,14 @@ Great news: this app is confirmed to run on Hostinger shared hosting (no root ac
 9. Confirm static assets are present and directly accessible:
    - `<app-folder>/public/dist/**`
    - `<app-folder>/public/theme/**`
-   - URLs like `https://<your-domain>/dist/css/main.3.7.1.min.css` must return `200`
+   - URLs like `https://<your-domain>/dist/css/main.2.0.0.min.css` must return `200`
 10. Open `https://<your-domain>/auth/login` and complete login/install verification.
 
 ### Post-deploy verification checklist
 
 - `GET /auth/login` returns `200`
-- `GET /dist/css/main.3.7.1.min.css` returns `200`
-- `GET /dist/js/compiled-frameworks.3.7.1.min.js` returns `200`
+- `GET /dist/css/main.2.0.0.min.css` returns `200`
+- `GET /dist/js/compiled-frameworks.2.0.0.min.js` returns `200`
 - OIDC start endpoint redirects to your provider
 - Successful login reaches `/dashboard/home`
 
