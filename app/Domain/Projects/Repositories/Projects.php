@@ -817,65 +817,6 @@ class Projects
     }
 
     /**
-     * Clear all task records for a project without deleting the project itself.
-     * Returns the number of deleted tickets.
-     */
-    public function clearProjectTasks(int $projectId): int
-    {
-        $ticketIds = $this->connection->table('zp_tickets')
-            ->where('projectId', $projectId)
-            ->pluck('id')
-            ->map(fn ($id) => (int) $id)
-            ->toArray();
-
-        if (count($ticketIds) === 0) {
-            return 0;
-        }
-
-        $this->connection->beginTransaction();
-        try {
-            $this->connection->table('zp_tickethistory')
-                ->whereIn('ticketId', $ticketIds)
-                ->delete();
-
-            $this->connection->table('zp_timesheets')
-                ->whereIn('ticketId', $ticketIds)
-                ->delete();
-
-            $this->connection->table('zp_entity_relationship')
-                ->where('entityAType', 'Ticket')
-                ->whereIn('entityA', $ticketIds)
-                ->delete();
-
-            $this->connection->table('zp_comment')
-                ->where('module', 'ticket')
-                ->whereIn('moduleId', $ticketIds)
-                ->delete();
-
-            $this->connection->table('zp_reactions')
-                ->where('module', 'ticket')
-                ->whereIn('moduleId', $ticketIds)
-                ->delete();
-
-            $this->connection->table('zp_file')
-                ->where('module', 'ticket')
-                ->whereIn('moduleId', $ticketIds)
-                ->delete();
-
-            $deleted = $this->connection->table('zp_tickets')
-                ->where('projectId', $projectId)
-                ->delete();
-
-            $this->connection->commit();
-
-            return (int) $deleted;
-        } catch (\Throwable $e) {
-            $this->connection->rollBack();
-            throw $e;
-        }
-    }
-
-    /**
      * hasTickets - check if there are Tickets related to a project
      */
     public function hasTickets($id): bool

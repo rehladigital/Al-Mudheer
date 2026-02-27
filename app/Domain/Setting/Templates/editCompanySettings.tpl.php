@@ -3,13 +3,6 @@ foreach ($__data as $var => $val) {
     $$var = $val; // necessary for blade refactor
 }
 $companySettings = $tpl->get('companySettings');
-$isOwner = (bool) ($tpl->get('isOwner') ?? false);
-$currentProjectId = (int) ($tpl->get('currentProjectId') ?? 0);
-$currentProject = $tpl->get('currentProject');
-$currentProjectName = is_array($currentProject) && isset($currentProject['name']) ? $currentProject['name'] : '';
-$availableVersions = $tpl->get('availableVersions') ?? [];
-$currentVersionRef = (string) ($tpl->get('currentVersionRef') ?? '');
-$versionStatus = $tpl->get('versionStatus') ?? [];
 ?>
 
 <div class="pageheader">
@@ -391,70 +384,6 @@ foreach ($relevanceLevels as $level => $labelKey) { ?>
                                 <?= $tpl->__('text.logo_reset')?><br /><br />
                                 <a href="<?= BASE_URL ?>/setting/editCompanySettings?resetLogo=1" class="btn btn-default"><?= $tpl->__('buttons.reset_logo')?></a>
 
-                                <?php if ($isOwner) { ?>
-                                    <hr />
-                                    <h5 class="widgettitle title-light"><span class="fa fa-triangle-exclamation"></span> Project Maintenance</h5>
-                                    <p>
-                                        <strong>Current project:</strong>
-                                        <?php if ($currentProjectId > 0) { ?>
-                                            #<?= (int) $currentProjectId ?> <?= $tpl->escape($currentProjectName) ?>
-                                        <?php } else { ?>
-                                            Not selected
-                                        <?php } ?>
-                                    </p>
-                                    <form method="post" action="<?= BASE_URL ?>/setting/editCompanySettings#details" onsubmit="return confirm('This will permanently remove all tasks in the current project. Continue?');">
-                                        <input type="hidden" name="clearProjectTasks" value="1" />
-                                        <input type="hidden" name="projectId" value="<?= (int) $currentProjectId ?>" />
-                                        <button type="submit" class="btn btn-danger" <?= $currentProjectId <= 0 ? 'disabled="disabled"' : '' ?>>
-                                            Clear All Tasks In Current Project
-                                        </button>
-                                    </form>
-
-                                    <hr />
-                                    <h5 class="widgettitle title-light"><span class="fa fa-code-branch"></span> Version Updater</h5>
-                                    <p>
-                                        <strong>Current version/ref:</strong>
-                                        <?= $tpl->escape($currentVersionRef !== '' ? $currentVersionRef : 'unknown') ?><br />
-                                        <?php if (($versionStatus['latest'] ?? '') !== '') { ?>
-                                            <strong>Latest release:</strong> <?= $tpl->escape((string) $versionStatus['latest']) ?><br />
-                                        <?php } ?>
-                                        <?php if (! empty($versionStatus['hasUpdate'])) { ?>
-                                            <span class="label label-warning">Update available</span><br />
-                                        <?php } ?>
-                                        Updates keep <code>config/.env</code>, <code>storage/</code>, and <code>userfiles/</code> intact.
-                                    </p>
-                                    <?php if (count($availableVersions) > 0) { ?>
-                                        <form method="post" action="<?= BASE_URL ?>/setting/editCompanySettings#details" onsubmit="return confirm('Update application files to selected version? This keeps .env and user settings unchanged.');">
-                                            <input type="hidden" name="runRepoUpdate" value="1" />
-                                            <div style="margin-bottom:8px;">
-                                                <select name="targetVersion" style="width:100%;">
-                                                    <option value="">-- Select Version --</option>
-                                                    <?php foreach ($availableVersions as $versionTag) { ?>
-                                                        <option value="<?= $tpl->escape($versionTag) ?>" <?= $versionTag === $currentVersionRef ? 'selected="selected"' : '' ?>>
-                                                            <?= $tpl->escape($versionTag) ?>
-                                                        </option>
-                                                    <?php } ?>
-                                                </select>
-                                            </div>
-                                            <button type="submit" class="btn btn-warning">
-                                                Update From Repository Tags
-                                            </button>
-                                        </form>
-                                    <?php } ?>
-
-                                    <form method="post" enctype="multipart/form-data" action="<?= BASE_URL ?>/setting/editCompanySettings#details" onsubmit="return confirm('Upload ZIP and update application files? .env, storage, and userfiles will be preserved.');" style="margin-top:12px;">
-                                        <input type="hidden" name="runPackageUpdate" value="1" />
-                                        <div style="margin-bottom:8px;">
-                                            <input type="file" name="updatePackage" accept=".zip" required />
-                                        </div>
-                                        <button type="submit" class="btn btn-primary">
-                                            Update From ZIP Package
-                                        </button>
-                                    </form>
-                                    <small>
-                                        Download release ZIP from your repository, then upload here. This server mode works without Git.
-                                    </small>
-                                <?php } ?>
                             </div>
                         </div>
                 </div>
