@@ -62,7 +62,7 @@ class Updated
     {
         $frontController = app()->make(Frontcontroller::class);
 
-        $allowedRoutes = ['install', 'install.update', 'auth.login', 'auth.resetPw', 'auth.userInvite', 'api.i18n'];
+        $allowedRoutes = ['install', 'install.update', 'auth.login', 'auth.resetPw', 'auth.userInvite', 'errors.error403', 'api.i18n'];
         $allowedRoutes = self::dispatchFilter('allowedRoutes', $allowedRoutes);
         if (in_array($frontController::getCurrentRoute(), $allowedRoutes)) {
             return false;
