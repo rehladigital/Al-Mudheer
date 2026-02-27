@@ -1,0 +1,164 @@
+name: Deploy To Production
+
+on:
+  push:
+    branches:
+      - prod
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-prod-branch
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/prod'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install deploy tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lftp sshpass
+
+      - name: Build deployment change set
+        run: |
+          set -euo pipefail
+
+          BASE_SHA="${{ github.event.before }}"
+          if [ -z "${BASE_SHA}" ] || [ "${BASE_SHA}" = "0000000000000000000000000000000000000000" ]; then
+            BASE_SHA="$(git rev-parse HEAD~1)"
+          fi
+
+          echo "Comparing changes: ${BASE_SHA} -> ${GITHUB_SHA}"
+
+          git diff --name-only --diff-filter=ACMRT "${BASE_SHA}" "${GITHUB_SHA}" > /tmp/upload_candidates.txt
+          git diff --name-only --diff-filter=D "${BASE_SHA}" "${GITHUB_SHA}" > /tmp/delete_candidates.txt
+
+          EXCLUDE_REGEX='^(\.git/|\.github/|\.cursor/|\.claude/|\.idea/|node_modules/|vendor/|storage/|userfiles/|config/\.env$|.*\.log$|.*\.sqlite$|.*\.db$|.*\.db-journal$)'
+
+          grep -Ev "${EXCLUDE_REGEX}" /tmp/upload_candidates.txt | sed '/^$/d' > /tmp/upload_files.txt || true
+          grep -Ev "${EXCLUDE_REGEX}" /tmp/delete_candidates.txt | sed '/^$/d' > /tmp/delete_files.txt || true
+
+          echo "Upload file count: $(wc -l < /tmp/upload_files.txt)"
+          echo "Delete file count: $(wc -l < /tmp/delete_files.txt)"
+          if [ -s /tmp/upload_files.txt ]; then
+            echo "Upload files:"
+            sed 's/^/  - /' /tmp/upload_files.txt
+          fi
+          if [ -s /tmp/delete_files.txt ]; then
+            echo "Delete files:"
+            sed 's/^/  - /' /tmp/delete_files.txt
+          fi
+
+      - name: Sync changed files to production (SFTP delta)
+        env:
+          PROD_HOST: ${{ secrets.PROD_HOST }}
+          PROD_PORT: ${{ secrets.PROD_PORT }}
+          PROD_USER: ${{ secrets.PROD_USER }}
+          PROD_PASSWORD: ${{ secrets.PROD_PASSWORD }}
+          PROD_REMOTE_PATH: ${{ secrets.PROD_REMOTE_PATH }}
+        run: |
+          set -euo pipefail
+
+          if [ ! -s /tmp/upload_files.txt ] && [ ! -s /tmp/delete_files.txt ]; then
+            echo "No deployable file changes detected."
+            exit 0
+          fi
+
+          lftp_cmd="/tmp/lftp-delta.cmd"
+          {
+            echo "set sftp:auto-confirm yes"
+            echo "set cmd:fail-exit yes"
+            echo "open -u \"$PROD_USER\",\"$PROD_PASSWORD\" sftp://$PROD_HOST:$PROD_PORT"
+
+            if [ -s /tmp/upload_files.txt ]; then
+              while IFS= read -r file; do
+                [ -z "$file" ] && continue
+                dir="$(dirname "$file")"
+                if [ "$dir" = "." ]; then
+                  remote_dir="$PROD_REMOTE_PATH"
+                else
+                  remote_dir="$PROD_REMOTE_PATH/$dir"
+                fi
+                echo "put -O \"$remote_dir\" \"$file\""
+              done < /tmp/upload_files.txt
+            fi
+
+            echo "bye"
+          } > "$lftp_cmd"
+
+          lftp -f "$lftp_cmd"
+
+          if [ -s /tmp/delete_files.txt ]; then
+            sshpass -p "$PROD_PASSWORD" ssh -o StrictHostKeyChecking=no -p "$PROD_PORT" "$PROD_USER@$PROD_HOST" \
+              "cd '$PROD_REMOTE_PATH' && while IFS= read -r rel; do [ -n \"\$rel\" ] && rm -f -- \"\$rel\"; done" \
+              < /tmp/delete_files.txt
+          fi
+
+      - name: Run remote post-deploy commands (composer + cache clear)
+        env:
+          PROD_HOST: ${{ secrets.PROD_HOST }}
+          PROD_PORT: ${{ secrets.PROD_PORT }}
+          PROD_USER: ${{ secrets.PROD_USER }}
+          PROD_PASSWORD: ${{ secrets.PROD_PASSWORD }}
+          PROD_REMOTE_PATH: ${{ secrets.PROD_REMOTE_PATH }}
+        run: |
+          sshpass -p "$PROD_PASSWORD" ssh -o StrictHostKeyChecking=no -p "$PROD_PORT" "$PROD_USER@$PROD_HOST" "
+            set -e;
+            cd '$PROD_REMOTE_PATH';
+            if [ -f composer.phar ]; then
+              /opt/alt/php83/usr/bin/php composer.phar install --no-dev --prefer-dist -o --ignore-platform-reqs;
+            else
+              echo 'composer.phar not found in deploy path';
+              exit 1;
+            fi;
+            /opt/alt/php83/usr/bin/php bin/leantime cache:clearAll;
+            echo 'Remote post-deploy commands completed successfully';
+          "
+
+      - name: Smoke check production login page
+        env:
+          PROD_APP_URL: ${{ secrets.PROD_APP_URL }}
+        run: |
+          code=$(curl -k -L -s -o /dev/null -w "%{http_code}" "$PROD_APP_URL/auth/login")
+          if [ "$code" != "200" ]; then
+            echo "Production login check failed: HTTP $code"
+            exit 1
+          fi
+          echo "Production login check passed: HTTP $code"
+
+      - name: Smoke check production core assets
+        env:
+          PROD_APP_URL: ${{ secrets.PROD_APP_URL }}
+        run: |
+          html=$(curl -k -L -s "$PROD_APP_URL/auth/login")
+          cssPath=$(echo "$html" | grep -oE '/dist/css/main\.[0-9]+\.[0-9]+\.[0-9]+\.min\.css' | head -n 1)
+          jsPath=$(echo "$html" | grep -oE '/dist/js/compiled-frameworks\.[0-9]+\.[0-9]+\.[0-9]+\.min\.js' | head -n 1)
+
+          if [ -z "$cssPath" ] || [ -z "$jsPath" ]; then
+            echo "Could not detect versioned CSS/JS assets from login page"
+            exit 1
+          fi
+
+          cssCode=$(curl -k -L -s -o /dev/null -w "%{http_code}" "$PROD_APP_URL$cssPath")
+          jsCode=$(curl -k -L -s -o /dev/null -w "%{http_code}" "$PROD_APP_URL$jsPath")
+
+          if [ "$cssCode" != "200" ]; then
+            echo "CSS smoke check failed: $cssPath returned HTTP $cssCode"
+            exit 1
+          fi
+          if [ "$jsCode" != "200" ]; then
+            echo "JS smoke check failed: $jsPath returned HTTP $jsCode"
+            exit 1
+          fi
+
+          echo "Asset smoke checks passed: $cssPath ($cssCode), $jsPath ($jsCode)"
