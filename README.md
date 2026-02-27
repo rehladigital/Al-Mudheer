@@ -120,7 +120,7 @@ php -S localhost:8090 -t public
 - App title and branding are set to **Al Mudheer**
 - Login flow is configured to prioritize SSO
 - Most runtime settings are managed in the database
-- Timesheet pages and stopwatch are restricted to the **Owner** role
+- Timesheet pages and stopwatch are restricted to the **Owner** role -- will be released in future
 
 ## License
 
