@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { hashPassword } from "../src/password.js";
 
 const prisma = new PrismaClient();
 
@@ -18,6 +19,30 @@ async function main() {
       create: item
     });
   }
+
+  const initialAdminEmail = process.env.INITIAL_ADMIN_EMAIL ?? "admin@example.com";
+  const initialAdminPassword = process.env.INITIAL_ADMIN_PASSWORD ?? "ChangeMe123!";
+
+  await prisma.user.upsert({
+    where: { email: initialAdminEmail },
+    update: {
+      firstName: "Yasser",
+      lastName: "Rehla",
+      role: 50,
+      source: "local",
+      status: "a",
+      passwordHash: hashPassword(initialAdminPassword)
+    },
+    create: {
+      email: initialAdminEmail,
+      firstName: "Yasser",
+      lastName: "Rehla",
+      role: 50,
+      source: "local",
+      status: "a",
+      passwordHash: hashPassword(initialAdminPassword)
+    }
+  });
 }
 
 main()

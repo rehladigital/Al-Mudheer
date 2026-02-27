@@ -4,6 +4,7 @@ import type { Request, Response } from "express";
 import { env } from "./config.js";
 import { prisma } from "./db.js";
 import { getDecryptedSetting, getSetting, toBool } from "./settings.js";
+import { verifyPassword } from "./password.js";
 
 function fallback<T>(primary: T | undefined | "", backup: T): T {
   return primary === undefined || primary === "" ? backup : primary;
@@ -174,11 +175,14 @@ export async function oidcCallback(req: Request, res: Response) {
 }
 
 export async function localLogin(req: Request, res: Response) {
-  const { email } = req.body as { email?: string };
-  if (!email) return res.status(400).json({ error: "Email is required" });
+  const { email, password } = req.body as { email?: string; password?: string };
+  if (!email || !password) return res.status(400).json({ error: "Email and password are required" });
 
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) return res.status(401).json({ error: "User not found" });
+  if (!user.passwordHash || !verifyPassword(password, user.passwordHash)) {
+    return res.status(401).json({ error: "Invalid email or password" });
+  }
 
   req.session.userId = user.id;
   req.session.userRole = user.role;
