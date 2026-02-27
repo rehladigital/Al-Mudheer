@@ -2,167 +2,118 @@
 
 Al Mudheer is a project and work management platform customized for Rehla Digital.
 
-## Project Sponsor
+## Version
 
-<div align="center">
-  <strong>Rehla Digital Inc</strong><br/><br/>
-  <img src="public/assets/images/logo-login.png" alt="Rehla Digital Inc Logo" width="280" />
-</div>
+- **Current release:** `2.10`
 
-Acknowledgement: This project is built based on the Leantime open-source project.
+## Access Control Documentation
 
-## Runtime status
+- RBAC logic is documented in `RBAC.md`.
+- Open: [RBAC.md](RBAC.md)
 
-- **Production runtime:** PHP app from repository root (this is the complete app with full theme and modules).
-- **Node migration track:** preserved under `node-migration/` for future modernization work; it is not the active production path.
-- **Release target:** `1.0.0` tag on `main`.
+## Fresh Installation Guide (Download and Install)
 
-## About Rehla Digital
+Use this guide for a clean new installation on a new server or Hostinger hosting account.
 
-Rehla Digital (`rehladigital.com`) positions itself as a data analytics and digital growth company focused on helping businesses turn data into decisions and visibility into revenue. Their public service areas include data and analytics consulting, SEO, PPC, social media management, web development, and Google Business Profile optimization, with a results-oriented approach centered on measurable business outcomes.
+## 1) Server Requirements
 
-Website: [https://rehladigital.com](https://rehladigital.com)
+- PHP `8.2+` (recommended `8.3`)
+- MySQL/MariaDB (recommended for production) or SQLite
+- Apache/Nginx with URL rewrite enabled
+- Required PHP extensions normally used by this project
 
-## Why this fork exists
+## 2) Download and Upload Files
 
-- Company-specific branding and UI customization
-- SSO-first authentication flow
-- Offline-friendly behavior with no outbound marketplace/help/update checks
-- Database-driven configuration for operational settings
+1. Download the project ZIP from repository release/source.
+2. Extract and upload all files to your app folder, for example:
+   - `/home/<user>/domains/<domain>/public_html/almudheer`
+3. Keep writable runtime folders available (if used in your environment):
+   - `storage/`
+   - `userfiles/`
 
-## Core capabilities
+## 3) Configure Environment
 
-- Task planning with kanban, list, table, calendar, and timeline views
-- Personal "My Kanban" shortcut on dashboard for cross-project assigned tasks
-- Project dashboards, milestones, goals, and reporting
-- Team collaboration with comments, files, and documentation
-- Role-based access control and project-level assignments
-- Timesheets and work tracking (planned for a future release)
+Create or update `config/.env` with your real values.
 
-## System requirements
-
-- PHP 8.2+
-- MySQL/MariaDB or SQLite
-- Apache/Nginx/IIS (with required routing support)
-- Standard PHP extensions required by this project
-
-## Local setup (quick start)
-
-1. Clone this repository
-2. Configure `config/.env` with required values
-3. Point web root to `public/`
-4. Open `/install` and complete setup
-
-## Hostinger shared hosting (validated)
-
-Great news: this app is confirmed to run on Hostinger shared hosting (no root access) with full UI assets and OIDC flow.
-
-### Exact deployment steps
-
-1. Create a subdomain/domain in Hostinger (example: `pm.example.com`).
-2. Upload the repository to:
-   - `/home/<user>/domains/<domain>/public_html/<app-folder>`
-3. In Hostinger PHP settings, use PHP `8.2+` (recommended `8.3`).
-4. Create `config/.env` (or `<app-folder>/.env`) with your DB + app settings:
-   - `LEAN_APP_URL='https://<your-domain>'`
-   - `LEAN_DB_DEFAULT_CONNECTION='mysql'`
-   - `LEAN_DB_HOST`, `LEAN_DB_DATABASE`, `LEAN_DB_USER`, `LEAN_DB_PASSWORD`, `LEAN_DB_PORT`
-   - `LEAN_SESSION_PASSWORD='<random-strong-value>'`
-   - OIDC values if SSO is required (`LEAN_OIDC_ENABLE`, `LEAN_OIDC_CLIENT_ID`, `LEAN_OIDC_CLIENT_SECRET`, `LEAN_OIDC_PROVIDER_URL`)
-5. Ensure root rewrite forwards requests to `public/`:
-   - file: `<app-folder>/.htaccess`
-6. Ensure front controller rewrite is present:
-   - file: `<app-folder>/public/.htaccess`
-7. Install production dependencies:
-   - `php composer.phar install --no-dev --prefer-dist -o --ignore-platform-reqs`
-8. Clear runtime caches:
-   - `/opt/alt/php83/usr/bin/php bin/leantime cache:clearAll`
-9. Confirm static assets are present and directly accessible:
-   - `<app-folder>/public/dist/**`
-   - `<app-folder>/public/theme/**`
-   - URLs like `https://<your-domain>/dist/css/main.3.7.1.min.css` must return `200`
-10. Open `https://<your-domain>/auth/login` and complete login/install verification.
-
-### Post-deploy verification checklist
-
-- `GET /auth/login` returns `200`
-- `GET /dist/css/main.3.7.1.min.css` returns `200`
-- `GET /dist/js/compiled-frameworks.3.7.1.min.js` returns `200`
-- OIDC start endpoint redirects to your provider
-- Successful login reaches `/dashboard/home`
-
-### One-command verification script
-
-- Run all checks:
-  - `SITE_URL=https://<your-domain> bash scripts/deploy-checklist.sh`
-- Include authenticated dashboard validation:
-  - `LOGIN_USERNAME=<email> LOGIN_PASSWORD=<password> SITE_URL=https://<your-domain> bash scripts/deploy-checklist.sh`
-
-### In-app version updater (owner only)
-
-- Location: `Administration -> Company Settings -> Version Updater`
-- Purpose: update app files with either:
-  - Git tag update (if git exists on server), or
-  - Manual ZIP package upload (works on Hostinger shared hosting without git).
-- ZIP update flow:
-  - download release ZIP from repository
-  - upload ZIP in `Version Updater`
-  - system updates files while preserving runtime paths
-  - runs `composer install --no-dev --prefer-dist -o --ignore-platform-reqs`
-  - runs `php bin/leantime cache:clearAll`
-- Safety guarantees:
-  - does **not** modify `config/.env`
-  - does **not** reset DB/install state
-  - does **not** delete `storage/` or `userfiles/`
-  - does **not** overwrite user settings records in DB
-- Update notification:
-  - `Version Updater` shows latest release and flags when a newer version is available.
-
-### Recommended FTP update command (safe sync)
-
-Use this script for future deployments to avoid overwriting runtime data:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts/ftp-safe-sync.ps1 `
-  -Host "185.162.54.190" `
-  -Port 65002 `
-  -User "<hostinger-user>" `
-  -Password "<hostinger-password>" `
-  -RemotePath "/home/<user>/domains/<domain>/public_html/pm" `
-  -SourcePath "."
+```env
+LEAN_APP_URL='https://pm.yourdomain.com'
+LEAN_DB_DEFAULT_CONNECTION='mysql'
+LEAN_DB_HOST='localhost'
+LEAN_DB_DATABASE='your_db_name'
+LEAN_DB_USER='your_db_user'
+LEAN_DB_PASSWORD='your_db_password'
+LEAN_DB_PORT='3306'
+LEAN_SESSION_PASSWORD='generate-a-long-random-secret'
 ```
 
-This sync excludes `config/.env`, `storage/`, `userfiles/`, local logs, databases, and developer-only folders.
+If you use Microsoft/SSO login, also set your OIDC keys in the same file.
 
-## Setup helper files
+## 4) Web Root and Rewrite Rules
 
-- `composer.phar`: local Composer binary included for environments without a global Composer install.
-- `manual_sqlite_install.php`: helper script to bootstrap SQLite install data.
+- Point your domain/subdomain document root to the app `public/` directory when possible.
+- If your host does not support that directly, keep the project in one folder and ensure `.htaccess` rewrite routes requests to `public/index.php`.
+- Confirm `public/.htaccess` is present.
 
-Use environment variables with `manual_sqlite_install.php`:
+## 5) Install Dependencies
 
-`ALMUDHEER_ADMIN_EMAIL`, `ALMUDHEER_ADMIN_PASSWORD`, `ALMUDHEER_ADMIN_FIRSTNAME`, `ALMUDHEER_ADMIN_LASTNAME`, `ALMUDHEER_COMPANY_NAME`, `ALMUDHEER_COMPANY_COUNTRY`, `ALMUDHEER_CURRENCY_CODE`, `ALMUDHEER_TIMEZONE`
-
-Default helper-script login (if env vars are not set):
-- Email: `admin@admin.com`
-- Password: `admin123`
-- Change this immediately in any non-local/shared environment.
-
-## Development
-
-- Run frontend/build tools as configured in this repository
-- Use the local PHP server for quick testing:
+From project root:
 
 ```bash
-php -S localhost:8090 -t public
+php composer.phar install --no-dev --prefer-dist -o --ignore-platform-reqs
 ```
 
-## Notes
+Hostinger-compatible PHP path example:
 
-- App title and branding are set to **Al Mudheer**
-- Login flow is configured to prioritize SSO
-- Most runtime settings are managed in the database
-- Timesheets and work tracking are planned for a future release
+```bash
+/opt/alt/php83/usr/bin/php composer.phar install --no-dev --prefer-dist -o --ignore-platform-reqs
+```
+
+## 6) Run Initial Installer
+
+1. Open `https://pm.yourdomain.com/install`
+2. Complete the setup wizard.
+3. Create admin user credentials.
+
+## 7) Run Post-Install Update and Cache Clear
+
+From project root:
+
+```bash
+/opt/alt/php83/usr/bin/php bin/leantime system:update
+/opt/alt/php83/usr/bin/php bin/leantime cache:clearAll
+```
+
+If you are not on Hostinger, use your server's PHP binary path.
+
+## 8) Validation Checklist
+
+- `https://pm.yourdomain.com/auth/login` returns HTTP `200`
+- Login works with your admin account
+- Dashboard opens successfully
+- Static assets load (CSS/JS without 404/500)
+
+## 9) Optional: SQLite Quick Bootstrap
+
+`manual_sqlite_install.php` can be used for helper bootstrap scenarios.
+Set values through environment variables:
+
+- `ALMUDHEER_ADMIN_EMAIL`
+- `ALMUDHEER_ADMIN_PASSWORD`
+- `ALMUDHEER_ADMIN_FIRSTNAME`
+- `ALMUDHEER_ADMIN_LASTNAME`
+- `ALMUDHEER_COMPANY_NAME`
+- `ALMUDHEER_COMPANY_COUNTRY`
+- `ALMUDHEER_CURRENCY_CODE`
+- `ALMUDHEER_TIMEZONE`
+
+## 10) Production Deployment Notes
+
+- Recommended branch flow: `develop` -> `prod` -> `main`
+- Production deploy is handled by GitHub Actions workflow:
+  - `.github/workflows/deploy-prod.yml`
+- Never commit secrets; keep credentials only in:
+  - server `config/.env`
+  - GitHub repository secrets
 
 ## License
 
