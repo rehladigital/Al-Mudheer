@@ -38,8 +38,8 @@ class Update extends Controller
      */
     public function get($params)
     {
-        $dbVersion = $this->settingsRepo->getSetting('db-version');
-        if ($this->appSettings->dbVersion == $dbVersion) {
+        $dbVersion = (string) ($this->settingsRepo->getSetting('db-version') ?: '');
+        if ($this->isDatabaseUpToDate($dbVersion, $this->appSettings->dbVersion)) {
             return FrontcontrollerCore::redirect(BASE_URL.'/auth/login');
         }
 
@@ -75,5 +75,35 @@ class Update extends Controller
         $this->tpl->setNotification('There was a problem. Please reach out to support@leantime.io for assistance.', 'error');
 
         return FrontcontrollerCore::redirect(BASE_URL.'/install/update');
+    }
+
+    private function isDatabaseUpToDate(string $currentVersion, string $targetVersion): bool
+    {
+        $currentNumeric = $this->normalizeVersionToInt($currentVersion);
+        $targetNumeric = $this->normalizeVersionToInt($targetVersion);
+
+        if ($currentNumeric !== null && $targetNumeric !== null) {
+            return $currentNumeric >= $targetNumeric;
+        }
+
+        return trim($currentVersion) === trim($targetVersion);
+    }
+
+    private function normalizeVersionToInt(string $version): ?int
+    {
+        $parts = explode('.', trim($version));
+        if (count($parts) !== 3) {
+            return null;
+        }
+
+        if (! ctype_digit($parts[0]) || ! ctype_digit($parts[1]) || ! ctype_digit($parts[2])) {
+            return null;
+        }
+
+        $major = $parts[0];
+        $minor = str_pad($parts[1], 2, '0', STR_PAD_LEFT);
+        $patch = str_pad($parts[2], 2, '0', STR_PAD_LEFT);
+
+        return (int) ($major.$minor.$patch);
     }
 }

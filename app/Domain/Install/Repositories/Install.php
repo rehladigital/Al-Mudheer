@@ -351,8 +351,20 @@ class Install
             }
         }
 
+        try {
+            $settingsService = app()->make(\Leantime\Domain\Setting\Services\Setting::class);
+            $settingsService->saveSetting('db-version', $this->settings->dbVersion);
+            $settingsCacheService->forget('db-version');
+        } catch (PDOException $e) {
+            Log::error($e);
+            Log::error($e->getTraceAsString());
+
+            return ['There was a problem updating the database'];
+        }
+
         session()->forget('isUpdated');
         session()->forget('dbVersion');
+        session()->forget('db-version');
 
         return true;
     }
