@@ -4,7 +4,7 @@ Al Mudheer is a project and work management platform customized for Rehla Digita
 
 ## Version
 
-- **Current release:** `3.00`
+- **Current release:** `3.50`
 
 ## Access Control Documentation
 
@@ -26,7 +26,7 @@ Use this guide for a clean new installation on a new server or Hostinger hosting
 
 1. Download the latest release ZIP from GitHub Releases (recommended for direct install).
    - Example release page: `https://github.com/rehladigital/Al-Mudheer/releases`
-   - Download the `Source code (zip)` for version `3.00` (or latest).
+   - Download the `Source code (zip)` for version `3.50` (or latest).
 2. Extract and upload all files to your app folder, for example:
    - `/home/<user>/domains/<domain>/public_html/almudheer`
 3. Keep writable runtime folders available (if used in your environment):

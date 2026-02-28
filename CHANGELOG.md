@@ -1,3 +1,20 @@
+# Version: 3.50 (Al Mudheer)
+
+## New Install and Setup Stability
+- Added RBAC schema self-healing in organization access flows so missing role/unit mapping tables are created automatically when required.
+- Enforced strict add-result checks for Unit/Role creation to prevent false-success notifications when records are not persisted.
+- Added fallback seeding for default department roles and unit backfill from legacy user department values when needed.
+
+## Production Stability Hardening
+- Fixed user mapping persistence behavior so unchecked role/client/unit selections correctly clear stale relations.
+- Hardened dashboard widget and widget-history deserialization to avoid runtime failures from invalid cached payloads.
+
+## Release Alignment
+- Standardized this release to version `3.50`.
+- Promoted the same release state across `develop`, `prod`, and `main`.
+
+---
+
 # Version: 3.00 (Al Mudheer)
 
 ## RBAC and Mapping Execution
