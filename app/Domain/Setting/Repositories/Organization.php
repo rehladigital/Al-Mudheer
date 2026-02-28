@@ -21,12 +21,36 @@ class Organization
             return [];
         }
 
-        return $this->db->table('zp_org_departments')
+        $departments = $this->db->table('zp_org_departments')
             ->select(['id', 'name', 'slug', 'isActive'])
             ->orderBy('name')
             ->get()
             ->map(fn ($row) => (array) $row)
             ->toArray();
+
+        if ($departments === [] && Schema::hasTable('zp_user') && Schema::hasColumn('zp_user', 'department')) {
+            $legacyDepartments = $this->db->table('zp_user')
+                ->select(['department'])
+                ->whereNotNull('department')
+                ->get();
+
+            foreach ($legacyDepartments as $row) {
+                $name = trim((string) ($row->department ?? ''));
+                if ($name === '') {
+                    continue;
+                }
+                $this->addDepartment($name);
+            }
+
+            $departments = $this->db->table('zp_org_departments')
+                ->select(['id', 'name', 'slug', 'isActive'])
+                ->orderBy('name')
+                ->get()
+                ->map(fn ($row) => (array) $row)
+                ->toArray();
+        }
+
+        return $departments;
     }
 
     public function getRoles(): array
@@ -34,6 +58,8 @@ class Organization
         if (! Schema::hasTable('zp_org_roles')) {
             return [];
         }
+
+        $this->ensureCoreRoles();
 
         return $this->db->table('zp_org_roles')
             ->select(['id', 'name', 'slug', 'systemRole', 'isProtected'])
@@ -163,6 +189,36 @@ class Organization
             'createdOn' => date('Y-m-d H:i:s'),
             'updatedOn' => date('Y-m-d H:i:s'),
         ]);
+    }
+
+    private function ensureCoreRoles(): void
+    {
+        if (! Schema::hasTable('zp_org_roles')) {
+            return;
+        }
+
+        $seedRoles = [
+            ['name' => 'Department Manager', 'slug' => 'department-manager', 'systemRole' => 30, 'isProtected' => 1],
+            ['name' => 'Department Editor', 'slug' => 'department-editor', 'systemRole' => 20, 'isProtected' => 1],
+            ['name' => 'Department Commentor', 'slug' => 'department-commentor', 'systemRole' => 10, 'isProtected' => 1],
+            ['name' => 'Department ReadOnly', 'slug' => 'department-readonly', 'systemRole' => 5, 'isProtected' => 1],
+        ];
+
+        foreach ($seedRoles as $role) {
+            $exists = $this->db->table('zp_org_roles')->where('slug', $role['slug'])->exists();
+            if ($exists) {
+                continue;
+            }
+
+            $this->db->table('zp_org_roles')->insert([
+                'name' => $role['name'],
+                'slug' => $role['slug'],
+                'systemRole' => $role['systemRole'],
+                'isProtected' => $role['isProtected'],
+                'createdOn' => date('Y-m-d H:i:s'),
+                'updatedOn' => date('Y-m-d H:i:s'),
+            ]);
+        }
     }
 
     public function getRoleUsageCounts(): array
