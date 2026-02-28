@@ -156,7 +156,9 @@
 
                 <div class='center'>
                     <div style='width:30%' class='svgContainer'>
-                        @php($emptyTodoSvg = ROOT . "/dist/images/svg/undraw_a_moment_to_relax_bbpa.svg")
+                        @php
+                            $emptyTodoSvg = ROOT . "/dist/images/svg/undraw_a_moment_to_relax_bbpa.svg";
+                        @endphp
                         @if(is_file($emptyTodoSvg))
                             {!! file_get_contents($emptyTodoSvg) !!}
                         @endif
