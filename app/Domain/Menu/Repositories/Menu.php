@@ -97,7 +97,7 @@ class Menu
             7 => ['type' => 'item', 'module' => 'projects', 'title' => 'menu.sidemenu_my_project_hub', 'icon' => 'fa fa-solid fa-house-flag', 'tooltip' => 'menu.projecthub_tooltip', 'href' => '/projects/showMy', 'active' => ['showMy'], 'role' => 'editor'],
             15 => ['type' => 'item', 'module' => 'timesheets', 'role' => 'owner', 'title' => 'menu.sidemenu_my_timesheets', 'icon' => 'fa-clock', 'tooltip' => 'menu.my_timesheets_tooltip', 'href' => '/timesheets/showMy', 'active' => ['showMy']],
             20 => ['type' => 'item', 'module' => 'calendar', 'title' => 'menu.sidemenu_my_calendar', 'icon' => 'fa fa-calendar', 'tooltip' => 'menu.my_calendar_tooltip', 'href' => '/calendar/showMyCalendar', 'active' => ['showMyCalendar']],
-            25 => ['type' => 'item', 'module' => 'tickets', 'title' => "<span class='fas fa-fw fa-table-columns'></span> My Kanban", 'icon' => 'fa fa-table-columns', 'tooltip' => 'menu.my_kanban_tooltip', 'href' => '/tickets/showKanban?currentProject=&users=me&status=not_done', 'active' => ['showKanban']],
+            25 => ['type' => 'item', 'module' => 'tickets', 'title' => "<span class='fas fa-fw fa-table-columns'></span> My Kanban", 'icon' => 'fa fa-table-columns', 'tooltip' => 'menu.my_kanban_tooltip', 'href' => '/tickets/showKanban?currentProject=all&users=me&status=not_done', 'active' => ['showKanban']],
         ],
         'projecthub' => [
             10 => ['type' => 'item', 'module' => 'projects', 'title' => 'menu.sidemenu_my_project_hub', 'icon' => 'fa-solid fa-house-flag', 'tooltip' => 'menu.my_projects_tooltip', 'href' => '/projects/showMy', 'active' => ['showMy']],

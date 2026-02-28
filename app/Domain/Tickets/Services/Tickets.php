@@ -261,6 +261,9 @@ class Tickets
         // Isset is all we want to do since empty values are valid
         if (isset($searchParams['currentProject']) === true) {
             $searchCriteria['currentProject'] = $searchParams['currentProject'];
+            if (is_string($searchCriteria['currentProject']) && strtolower(trim($searchCriteria['currentProject'])) === 'all') {
+                $searchCriteria['currentProject'] = '';
+            }
         }
 
         if (isset($searchParams['currentUser']) === true) {
