@@ -17,10 +17,10 @@
 <link rel="shortcut icon" href="{!! BASE_URL !!}/assets/images/favicon.png"/>
 <link rel="apple-touch-icon" href="{!! BASE_URL !!}/assets/images/apple-touch-icon.png">
 
-<link rel="stylesheet" href="{!! BASE_URL !!}/dist/css/main.{!! $version !!}.min.css"/>
-<link rel="stylesheet" href="{!! BASE_URL !!}/dist/css/app.{!! $version !!}.min.css"/>
+<link rel="stylesheet" href="{!! BASE_URL !!}/dist/css/main.{!! $assetVersion !!}.min.css"/>
+<link rel="stylesheet" href="{!! BASE_URL !!}/dist/css/app.{!! $assetVersion !!}.min.css"/>
 @if($tpl->needsComponent('tiptap'))
-<link rel="stylesheet" href="{!! BASE_URL !!}/dist/css/tiptap-editor.{!! $version !!}.min.css"/>
+<link rel="stylesheet" href="{!! BASE_URL !!}/dist/css/tiptap-editor.{!! $assetVersion !!}.min.css"/>
 <link rel="stylesheet" href="{!! BASE_URL !!}/dist/css/katex.min.css"/>
 @endif
 
@@ -28,34 +28,34 @@
 
 <script src="{!! BASE_URL !!}/api/i18n?v={!! $version !!}"></script>
 
-<script src="{!! BASE_URL !!}/dist/js/compiled-htmx.{!! $version !!}.min.js"></script>
-<script src="{!! BASE_URL !!}/dist/js/compiled-htmx-extensions.{!! $version !!}.min.js"></script>
+<script src="{!! BASE_URL !!}/dist/js/compiled-htmx.{!! $assetVersion !!}.min.js"></script>
+<script src="{!! BASE_URL !!}/dist/js/compiled-htmx-extensions.{!! $assetVersion !!}.min.js"></script>
 
 <!-- libs -->
-<script src="{!! BASE_URL !!}/dist/js/compiled-frameworks.{!! $version !!}.min.js"></script>
-<script src="{!! BASE_URL !!}/dist/js/compiled-framework-plugins.{!! $version !!}.min.js"></script>
-<script src="{!! BASE_URL !!}/dist/js/compiled-global-component.{!! $version !!}.min.js"></script>
+<script src="{!! BASE_URL !!}/dist/js/compiled-frameworks.{!! $assetVersion !!}.min.js"></script>
+<script src="{!! BASE_URL !!}/dist/js/compiled-framework-plugins.{!! $assetVersion !!}.min.js"></script>
+<script src="{!! BASE_URL !!}/dist/js/compiled-global-component.{!! $assetVersion !!}.min.js"></script>
 @if($tpl->needsComponent('calendar'))
-<script src="{!! BASE_URL !!}/dist/js/compiled-calendar-component.{!! $version !!}.min.js"></script>
+<script src="{!! BASE_URL !!}/dist/js/compiled-calendar-component.{!! $assetVersion !!}.min.js"></script>
 @endif
 @if($tpl->needsComponent('table'))
-<script src="{!! BASE_URL !!}/dist/js/compiled-table-component.{!! $version !!}.min.js"></script>
+<script src="{!! BASE_URL !!}/dist/js/compiled-table-component.{!! $assetVersion !!}.min.js"></script>
 @endif
 @if($tpl->needsComponent('tiptap'))
-<script src="{!! BASE_URL !!}/dist/js/compiled-tiptap-toolbar.{!! $version !!}.min.js"></script>
-<script src="{!! BASE_URL !!}/dist/js/compiled-tiptap-editor.{!! $version !!}.min.js"></script>
+<script src="{!! BASE_URL !!}/dist/js/compiled-tiptap-toolbar.{!! $assetVersion !!}.min.js"></script>
+<script src="{!! BASE_URL !!}/dist/js/compiled-tiptap-editor.{!! $assetVersion !!}.min.js"></script>
 @endif
 @if($tpl->needsComponent('gantt'))
-<script src="{!! BASE_URL !!}/dist/js/compiled-gantt-component.{!! $version !!}.min.js"></script>
+<script src="{!! BASE_URL !!}/dist/js/compiled-gantt-component.{!! $assetVersion !!}.min.js"></script>
 @endif
 @if($tpl->needsComponent('chart'))
-<script src="{!! BASE_URL !!}/dist/js/compiled-chart-component.{!! $version !!}.min.js"></script>
+<script src="{!! BASE_URL !!}/dist/js/compiled-chart-component.{!! $assetVersion !!}.min.js"></script>
 @endif
 
 @dispatchEvent('afterScriptLibTags')
 
 <!-- app -->
-<script src="{!! BASE_URL !!}/dist/js/compiled-app.{!! $version !!}.min.js"></script>
+<script src="{!! BASE_URL !!}/dist/js/compiled-app.{!! $assetVersion !!}.min.js"></script>
 @dispatchEvent('afterMainScriptTag')
 
 <!--

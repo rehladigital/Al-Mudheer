@@ -29,6 +29,7 @@ class PageBottom extends Composer
     {
         return [
             'version' => $this->settings->appVersion,
+            'assetVersion' => $this->settings->assetVersion ?? $this->settings->appVersion,
             'poorMansCron' => $this->environment->get('poorMansCron'),
             'loggedIn' => session()->exists('userdata'),
         ];

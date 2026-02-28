@@ -66,6 +66,7 @@ class Header extends Composer
             'primaryColor' => $this->themeCore->getPrimaryColor(),
             'theme' => $theme,
             'version' => $this->appSettings->appVersion ?? '',
+            'assetVersion' => $this->appSettings->assetVersion ?? ($this->appSettings->appVersion ?? ''),
             'themeScripts' => [
                 $this->themeCore->getJsUrl() ?? '',
                 $this->themeCore->getCustomJsUrl() ?? '',
