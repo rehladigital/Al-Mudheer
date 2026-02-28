@@ -20,6 +20,7 @@ use PHPMailer\PHPMailer\PHPMailer;
 class Mailer
 {
     use DispatchesEvents;
+    private const EMAIL_FALLBACK_LOGO = '/assets/images/logo-login.png';
 
     public string $cc;
 
@@ -138,7 +139,16 @@ class Mailer
             $this->mailAgent->isMail();
         }
 
-        $this->logo = ! session()->has('companysettings.logoPath') ? '/dist/images/logo_blue.png' : session('companysettings.logoPath');
+        $configuredLogoPath = (string) ($settingsRepo->getSetting('companysettings.logoPath') ?: '');
+        if (session()->has('companysettings.logoPath') && (string) session('companysettings.logoPath') !== '') {
+            $this->logo = (string) session('companysettings.logoPath');
+        } elseif ($configuredLogoPath !== '') {
+            // In request-less contexts (e.g., queue workers), session may be empty.
+            // Prefer persisted company logo path before falling back to app default.
+            $this->logo = $configuredLogoPath;
+        } else {
+            $this->logo = self::EMAIL_FALLBACK_LOGO;
+        }
         $this->companyColor = ! session()->has('companysettings.primarycolor') ? '#006c9e' : session('companysettings.primarycolor');
 
         $this->language = $language;
@@ -247,8 +257,12 @@ class Mailer
 
         $this->mailAgent->Subject = $this->subject;
 
-        if (str_contains($this->logo, 'images/logo.svg')) {
-            $this->logo = '/dist/images/logo_blue.png';
+        if (
+            str_contains($this->logo, 'images/logo.svg')
+            || str_contains($this->logo, '/dist/images/logo_blue.png')
+            || str_contains($this->logo, '/dist/images/logo.png')
+        ) {
+            $this->logo = self::EMAIL_FALLBACK_LOGO;
         }
 
         $logoParts = parse_url($this->logo);
@@ -261,7 +275,7 @@ class Mailer
                 // Logo comes from local file system
                 $this->mailAgent->addEmbeddedImage(ROOT.''.$this->logo, 'companylogo');
             } else {
-                $this->mailAgent->addEmbeddedImage(ROOT.'/dist/images/logo_blue.png', 'companylogo');
+                $this->mailAgent->addEmbeddedImage(ROOT.self::EMAIL_FALLBACK_LOGO, 'companylogo');
             }
 
             $inlineLogoContent = 'cid:companylogo';
