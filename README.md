@@ -54,6 +54,14 @@ We built **Al Mudheer** to provide teams worldwide with a robust, data-driven to
 
 ---
 
+## 📸 Email Branding Screenshot
+
+Legacy email branding issue observed during notifications (Leantime logo fallback shown instead of Al Mudheer branding):
+
+![Email branding fallback issue](docs/images/email-branding-legacy-logo.png)
+
+---
+
 ## 📞 Reach Us
 Have questions or want to learn more about how Rehla Digital supports global organizations? Reach out to us directly:
 
