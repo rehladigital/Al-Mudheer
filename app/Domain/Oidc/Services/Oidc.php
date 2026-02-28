@@ -275,7 +275,7 @@ class Oidc
                 if ($userId !== false) {
                     $user = $this->userRepo->getUserByEmail($userName);
                     if (is_array($user) && isset($user['id'])) {
-                        $this->applyDefaultSsoMappings((int) $user['id']);
+                        $this->applyDefaultSsoMappings((int) $user['id'], false);
                         $user = $this->userRepo->getUserByEmail($userName);
                     }
                 } else {
@@ -302,6 +302,11 @@ class Oidc
 
             // Get updated user
             $user = $this->userRepo->getUserByEmail($userName);
+            if (is_array($user) && isset($user['id'])) {
+                // Preserve manual RBAC changes: only fill defaults when mappings are missing.
+                $this->applyDefaultSsoMappings((int) $user['id'], true);
+                $user = $this->userRepo->getUserByEmail($userName);
+            }
         }
 
         $this->authService->setUserSession($user, false);
@@ -309,16 +314,16 @@ class Oidc
         return Frontcontroller::redirect(BASE_URL.'/dashboard/home');
     }
 
-    private function applyDefaultSsoMappings(int $userId): void
+    private function applyDefaultSsoMappings(int $userId, bool $onlyWhenMissing = false): void
     {
         if ($userId <= 0) {
             return;
         }
 
         try {
-            $roleId = $this->findIdByName('zp_org_roles', $this->defaultSsoOrgRoleName);
+            $roleId = $this->findOrgRoleId();
             $clientId = $this->findIdByName('zp_clients', $this->defaultSsoClientName);
-            $departmentId = $this->findIdByName('zp_org_departments', $this->defaultSsoDepartmentName);
+            $departmentId = $this->findDepartmentId();
 
             if (
                 $roleId <= 0
@@ -334,37 +339,55 @@ class Oidc
             }
 
             if ($clientId > 0 && Schema::hasTable('zp_user') && Schema::hasColumn('zp_user', 'clientId')) {
-                DB::table('zp_user')
-                    ->where('id', $userId)
-                    ->update([
-                        'clientId' => $clientId,
-                        'modified' => now(),
-                    ]);
+                $existingClientId = (int) (DB::table('zp_user')->where('id', $userId)->value('clientId') ?? 0);
+                if ($onlyWhenMissing === false || $existingClientId <= 0) {
+                    DB::table('zp_user')
+                        ->where('id', $userId)
+                        ->update([
+                            'clientId' => $clientId,
+                            'modified' => now(),
+                        ]);
+                }
             }
 
             if ($roleId > 0 && Schema::hasTable('zp_org_user_roles')) {
-                DB::table('zp_org_user_roles')->updateOrInsert(
-                    ['userId' => $userId],
-                    ['roleId' => $roleId, 'updatedOn' => now()]
-                );
+                $existingRoleId = (int) (DB::table('zp_org_user_roles')->where('userId', $userId)->value('roleId') ?? 0);
+                if ($onlyWhenMissing === false || $existingRoleId <= 0) {
+                    DB::table('zp_org_user_roles')->updateOrInsert(
+                        ['userId' => $userId],
+                        ['roleId' => $roleId, 'updatedOn' => now()]
+                    );
+                }
             }
 
             if ($clientId > 0 && Schema::hasTable('zp_org_user_clients')) {
-                DB::table('zp_org_user_clients')->where('userId', $userId)->delete();
-                DB::table('zp_org_user_clients')->insert([
-                    'userId' => $userId,
-                    'clientId' => $clientId,
-                    'createdOn' => now(),
-                ]);
+                $hasClientMapping = DB::table('zp_org_user_clients')
+                    ->where('userId', $userId)
+                    ->exists();
+                if ($onlyWhenMissing === false) {
+                    DB::table('zp_org_user_clients')->where('userId', $userId)->delete();
+                }
+                if ($onlyWhenMissing === false || $hasClientMapping === false) {
+                    DB::table('zp_org_user_clients')->updateOrInsert(
+                        ['userId' => $userId, 'clientId' => $clientId],
+                        ['createdOn' => now()]
+                    );
+                }
             }
 
             if ($departmentId > 0 && Schema::hasTable('zp_org_user_departments')) {
-                DB::table('zp_org_user_departments')->where('userId', $userId)->delete();
-                DB::table('zp_org_user_departments')->insert([
-                    'userId' => $userId,
-                    'departmentId' => $departmentId,
-                    'createdOn' => now(),
-                ]);
+                $hasDepartmentMapping = DB::table('zp_org_user_departments')
+                    ->where('userId', $userId)
+                    ->exists();
+                if ($onlyWhenMissing === false) {
+                    DB::table('zp_org_user_departments')->where('userId', $userId)->delete();
+                }
+                if ($onlyWhenMissing === false || $hasDepartmentMapping === false) {
+                    DB::table('zp_org_user_departments')->updateOrInsert(
+                        ['userId' => $userId, 'departmentId' => $departmentId],
+                        ['createdOn' => now()]
+                    );
+                }
             }
         } catch (\Throwable $e) {
             Log::error('Failed applying OIDC default user mappings', [
@@ -384,7 +407,7 @@ class Oidc
             return 0;
         }
 
-        $normalized = mb_strtolower(trim($name));
+        $normalized = strtolower(trim($name));
         if ($normalized === '') {
             return 0;
         }
@@ -394,6 +417,56 @@ class Oidc
             ->value('id');
 
         return (int) ($id ?? 0);
+    }
+
+    private function findOrgRoleId(): int
+    {
+        $roleId = $this->findIdByName('zp_org_roles', $this->defaultSsoOrgRoleName);
+        if ($roleId > 0) {
+            return $roleId;
+        }
+
+        if (Schema::hasTable('zp_org_roles') && Schema::hasColumn('zp_org_roles', 'slug')) {
+            $slug = $this->slugify($this->defaultSsoOrgRoleName);
+            if ($slug !== '') {
+                $roleId = (int) (DB::table('zp_org_roles')->where('slug', $slug)->value('id') ?? 0);
+            }
+        }
+
+        if (
+            $roleId <= 0
+            && Schema::hasTable('zp_org_roles')
+            && Schema::hasColumn('zp_org_roles', 'systemRole')
+        ) {
+            $roleId = (int) (DB::table('zp_org_roles')->where('systemRole', $this->defaultRole)->value('id') ?? 0);
+        }
+
+        return $roleId;
+    }
+
+    private function findDepartmentId(): int
+    {
+        $departmentId = $this->findIdByName('zp_org_departments', $this->defaultSsoDepartmentName);
+        if ($departmentId > 0) {
+            return $departmentId;
+        }
+
+        if (Schema::hasTable('zp_org_departments') && Schema::hasColumn('zp_org_departments', 'slug')) {
+            $slug = $this->slugify($this->defaultSsoDepartmentName);
+            if ($slug !== '') {
+                $departmentId = (int) (DB::table('zp_org_departments')->where('slug', $slug)->value('id') ?? 0);
+            }
+        }
+
+        return $departmentId;
+    }
+
+    private function slugify(string $value): string
+    {
+        $slug = strtolower(trim($value));
+        $slug = preg_replace('/[^a-z0-9]+/', '-', $slug) ?? '';
+
+        return trim($slug, '-');
     }
 
     private function resolveEmail(array $userInfo): string
