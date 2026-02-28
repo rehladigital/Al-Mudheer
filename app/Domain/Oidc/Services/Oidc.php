@@ -120,7 +120,12 @@ class Oidc
         $this->scopes = $this->config->get('oidcScopes', '');
         $allowPublicRegistration = $this->settingsRepo->getSetting('companysettings.microsoftAuth.allowPublicRegistration');
         if ($allowPublicRegistration === false) {
-            $this->createUser = $this->config->get('oidcCreateUser', false);
+            // Keep JIT provisioning enabled by default when no explicit setting exists.
+            $this->createUser = in_array(
+                strtolower((string) $this->config->get('oidcCreateUser', 'true')),
+                ['1', 'true', 'on', 'yes'],
+                true
+            );
         } else {
             $this->createUser = in_array(strtolower((string) $allowPublicRegistration), ['1', 'true', 'on', 'yes'], true);
         }
@@ -251,9 +256,17 @@ class Oidc
         }
 
         $user = $this->userRepo->getUserByEmail($userName);
+        if ($user === false) {
+            // If an SSO user exists but is inactive, reactivate and continue login.
+            $inactiveUser = $this->userRepo->getUserByEmail($userName, 'i');
+            if (is_array($inactiveUser) && isset($inactiveUser['id'])) {
+                $this->userRepo->patchUser((int) $inactiveUser['id'], ['status' => 'a']);
+                $user = $this->userRepo->getUserByEmail($userName);
+            }
+        }
 
         if ($user === false) {
-            if ($this->createUser) {
+            if ($this->shouldCreateUser($userInfo)) {
                 // create user if it doesn't exist yet
                 $userArray = [
                     'firstname' => $this->resolveFirstName($userInfo),
@@ -549,6 +562,29 @@ class Oidc
     private function getUserRole(array $userInfo, array $user = []): string
     {
         return $user['role'] ?? 'readonly';
+    }
+
+    private function shouldCreateUser(array $userInfo): bool
+    {
+        if ($this->createUser) {
+            return true;
+        }
+
+        // For Entra app-assigned sign-ins, token audience/authorized party should match configured clientId.
+        $tokenClientIds = [
+            $this->readMultilayerKey($userInfo, 'aud'),
+            $this->readMultilayerKey($userInfo, 'azp'),
+            $this->readMultilayerKey($userInfo, 'appid'),
+            $this->readMultilayerKey($userInfo, 'client_id'),
+        ];
+
+        foreach ($tokenClientIds as $tokenClientId) {
+            if ($tokenClientId !== '' && hash_equals((string) $this->clientId, (string) $tokenClientId)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
