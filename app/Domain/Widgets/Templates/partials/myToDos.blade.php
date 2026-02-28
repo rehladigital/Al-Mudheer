@@ -230,78 +230,80 @@
                     }
                 @endphp
 
-                <div class="ticketBox1" id="ticketBox1-{{ $groupKey }}-{{ $loop->index }}">
-                    <h4 class="widgettitle title-light toDoBoxTitle">
-                        <span>{!! __($ticketGroup["labelName"]) !!}</span>
+                <x-global::accordion id="ticketBox1-{{ $groupKey }}-{{ $loop->index }}">
+                    <x-slot name="title">
+                        {!!  __($ticketGroup["labelName"]) !!}
                         <span class="task-count" id="task-count-{{ $groupKey }}">
                             ({{ count($ticketGroup["tickets"]) }})
                         </span>
-                        <a href="javascript:void(0);" class="add-task-button btn btn-link"
-                           style="padding:0; padding-left:1px; width:31px; line-height:31px; height:31px; font-weight:bold; text-align:center; font-size:var(--font-size-l); float:right;"
-                           data-group="{{ $groupKey }}">
-                            <i class="fa-solid fa-circle-plus"></i>
-                        </a>
-                    </h4>
+                    </x-slot>
+                    <x-slot name="actionlink">
+                        <a href="javascript:void(0);" class="add-task-button btn btn-link" style="padding:0px; padding-left:1px; width:31px; line-height:31px; height:31px; font-weight:bold; text-align: center; font-size:var(--font-size-l);" data-group="{{ $groupKey }}">
+                            <i class="fa-solid fa-circle-plus"></i></a>
+                    </x-slot>
+                    <x-slot name="content">
+                        <!-- Quick Add Form for this group -->
+                        <div class="quickAddForm" id="quickAddForm-{{ $groupKey }}"
+                             style="display:none; margin-bottom:15px; padding-bottom:5px; padding-left:5px;">
+                            <form method="post"
+                                  hx-post="{{ BASE_URL }}/widgets/myToDos/addTodo"
+                                  hx-target="#yourToDoContainer"
+                                  hx-swap="outerHTML"
+                                  hx-indicator=".htmx-indicator">
+                                <div class="tw-flex tw-flex-row tw-gap-2">
+                                    <div class="tw-flex-grow">
+                                        <input type="text" name="headline" class="main-title-input"
+                                               style="font-size:var(--base-font-size)"
+                                               placeholder="{{ __('input.placeholders.what_are_you_working_on') }}"/>
+                                        <input type="hidden" name="quickadd" value="true"/>
+                                    </div>
+                                    <div>
+                                        <select name="projectId">
+                                            @foreach($allAssignedprojects as $project)
+                                                <option value="{{ $project['id']  }}"
 
-                    <!-- Quick Add Form for this group -->
-                    <div class="quickAddForm" id="quickAddForm-{{ $groupKey }}"
-                         style="display:none; margin-bottom:15px; padding-bottom:5px; padding-left:5px;">
-                        <form method="post"
-                              hx-post="{{ BASE_URL }}/widgets/myToDos/addTodo"
-                              hx-target="#yourToDoContainer"
-                              hx-swap="outerHTML"
-                              hx-indicator=".htmx-indicator">
-                            <div class="tw-flex tw-flex-row tw-gap-2">
-                                <div class="tw-flex-grow">
-                                    <input type="text" name="headline" class="main-title-input"
-                                           style="font-size:var(--base-font-size)"
-                                           placeholder="{{ __('input.placeholders.what_are_you_working_on') }}"/>
-                                    <input type="hidden" name="quickadd" value="true"/>
-                                </div>
-                                <div>
-                                    <select name="projectId">
-                                        @foreach($allAssignedprojects as $project)
-                                            <option value="{{ $project['id'] }}"
-                                                {{ (($groupBy === "project" && $project['id'] == $groupKey) || ($groupBy !== "project" && session('currentProject') == $groupKey)) ? 'selected' : '' }}>
-                                                {{ $project["name"] }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div>
-                                    <input type="hidden" name="milestone" value=""/>
-                                    <input type="hidden" name="status" value="3"/>
-                                    <input type="hidden" name="priority"
-                                           value="{{ $groupBy === 'priority' ? $groupKey : '' }}"/>
+                                                    {{ (($groupBy === "project" && $project['id'] == $groupKey) || ($groupBy !== "project" && session('currentProject') == $groupKey)) ? 'selected' : '' }}
+                                                >{{ $project["name"]  }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <input type="hidden" name="milestone" value=""/>
+                                        <input type="hidden" name="status" value="3"/>
+                                        <input type="hidden" name="priority"
+                                               value="{{ $groupBy === "priority" ? $groupKey : '' }}"/>
 
-                                    @php
-                                        $dueDate = '';
-                                        if ($groupKey === 'thisWeek') {
-                                            $dueDate = dtHelper()->userNow()->next('Friday')->formatDateForUser();
-                                        } elseif ($groupKey === 'overdue') {
-                                            $dueDate = dtHelper()->userNow()->subtract('3 days')->formatDateForUser();
-                                        }
-                                    @endphp
-                                    <input type="hidden" name="dateToFinish" value="{{ $dueDate }}"/>
-                                    <textarea name="description" class="description-input" style="display:none;"
-                                              placeholder="{{ __('input.placeholders.description') }}"></textarea>
+                                        @php
+                                            $dueDate = '';
+                                            if($groupKey === 'thisWeek'){
+                                                $dueDate = dtHelper()->userNow()->next('Friday')->formatDateForUser();
+                                            }else if($groupKey === 'overdue'){
+                                                $dueDate = dtHelper()->userNow()->subtract("3 days")->formatDateForUser();
+                                            }
+                                        @endphp
+                                        <input type="hidden" name="dateToFinish"
+                                               value="{{ $dueDate }}"/>
+                                        <textarea name="description" class="description-input" style="display:none;"
+                                                  placeholder="{{ __('input.placeholders.description') }}"></textarea>
+                                    </div>
+                                    <div>
+                                        <input type="submit" value="{{ __('buttons.save') }}" name="create"
+                                               class="btn btn-primary"/>
+                                        <a href="javascript:void(0);" class="btn cancel-add-task"
+                                           data-group="{{ $groupKey }}">{{ __('buttons.cancel') }}</a>
+                                    </div>
                                 </div>
-                                <div>
-                                    <input type="submit" value="{{ __('buttons.save') }}" name="create"
-                                           class="btn btn-primary"/>
-                                    <a href="javascript:void(0);" class="btn cancel-add-task"
-                                       data-group="{{ $groupKey }}">{{ __('buttons.cancel') }}</a>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
+                            </form>
+                        </div>
 
-                    <div class="sortable-list" data-container-type="section" data-group-key="{{ $groupKey }}" style="padding-left:5px;">
-                        @foreach ($ticketGroup['tickets'] as $row)
-                            @include('widgets::partials.todoItem', ['ticket' => $row, 'statusLabels' => $statusLabels, 'onTheClock' => $onTheClock, 'tpl' => $tpl, 'level' => 0, 'groupKey' => $groupKey])
-                        @endforeach
-                    </div>
-                </div>
+                        <div class="sortable-list" data-container-type="section" data-group-key="{{ $groupKey }}" style="padding-left:5px;">
+                            @foreach ($ticketGroup['tickets'] as $row)
+                                @include('widgets::partials.todoItem', ['ticket' => $row, 'statusLabels' => $statusLabels, 'onTheClock' => $onTheClock, 'tpl' => $tpl, 'level' => 0, 'groupKey' => $groupKey])
+                            @endforeach
+                        </div>
+                    </x-slot>
+
+                </x-global::accordion>
 
             @endforeach
 
