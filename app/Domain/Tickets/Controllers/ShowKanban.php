@@ -42,6 +42,16 @@ class ShowKanban extends Controller
      */
     public function get(array $params): Response
     {
+        // Preserve explicit cross-project intent from query string.
+        // Some request parsers drop empty values (e.g. currentProject=),
+        // which would otherwise fall back to session currentProject.
+        if (
+            (array_key_exists('currentProject', $_GET) && trim((string) ($_GET['currentProject'] ?? '')) === '')
+            || (array_key_exists('projectId', $_GET) && trim((string) ($_GET['projectId'] ?? '')) === '')
+        ) {
+            $params['currentProject'] = '';
+        }
+
         if (isset($params['users']) && $params['users'] === 'me') {
             $params['users'] = (string) session('userdata.id');
         }
