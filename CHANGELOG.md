@@ -1,3 +1,31 @@
+# Version: 2.11.1 (Al Mudheer)
+
+## Stability & Upgrade Fixes
+- **Database Update Gate Loop** — Normalized DB version comparison in install/update flow so completed upgrades stop redirecting users to `/install/update`.
+- **Deterministic DB Version Persistence** — Successful update path now explicitly writes target `db-version` and clears related session/cache keys to prevent stale upgrade prompts.
+
+## RBAC/User Management Cleanup
+- **Mapping Role Noise Removed** — User role mapping dropdown now shows only canonical department roles:
+  - Department Manager
+  - Department Editor
+  - Department Commentor
+  - Department ReadOnly
+- **Cleaner Mapping UI** — Updated mapping table wording and guidance to reduce repetitive role-selection confusion while preserving existing save behavior.
+
+## Deployment Pipeline Hardening
+- **No More Hanging Delta Sync Runs** — Production workflow now uses:
+  - `cancel-in-progress: true` for deploy concurrency
+  - bounded timeout for SFTP delta step
+  - explicit lftp network timeout/retry guardrails
+  - bounded timeout for remote delete SSH command
+- **Post-deploy Validation Preserved** — Composer/cache clear and smoke checks for login + core assets remain in place.
+
+## Branch Promotion
+- Release promoted through `develop -> prod -> main`.
+- Production deployment workflow re-run and verified successful after timeout hardening.
+
+---
+
 # Version: 3.7.1
 
 ## Bug Fixes
