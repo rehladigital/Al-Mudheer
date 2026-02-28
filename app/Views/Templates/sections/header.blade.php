@@ -18,7 +18,7 @@
 <link rel="apple-touch-icon" href="{!! BASE_URL !!}/assets/images/apple-touch-icon.png">
 
 <link rel="stylesheet" href="{!! BASE_URL !!}/dist/css/main.{!! $assetVersion !!}.min.css"/>
-<link rel="stylesheet" href="{!! BASE_URL !!}/dist/css/main.{!! $assetVersion !!}.min.css"/>
+<link rel="stylesheet" href="{!! BASE_URL !!}/dist/css/app.{!! $assetVersion !!}.min.css"/>
 @if($tpl->needsComponent('tiptap'))
 <link rel="stylesheet" href="{!! BASE_URL !!}/dist/css/tiptap-editor.{!! $assetVersion !!}.min.css"/>
 <link rel="stylesheet" href="{!! BASE_URL !!}/dist/css/katex.min.css"/>
