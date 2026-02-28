@@ -225,6 +225,11 @@ $allTickets = $group['items'];
                                                     <?php } ?>
                                                     <small><i class="fa <?php echo $todoTypeIcons[strtolower($row['type'])]; ?>"></i> <?php echo $tpl->__('label.'.strtolower($row['type'])); ?></small>
                                                     <small>#<?php echo $row['id']; ?></small>
+                                                    <div class="tw-mt-xs">
+                                                        <small><strong>Project:</strong> <?php echo $tpl->escape((string) ($row['projectName'] ?? '')); ?></small><br/>
+                                                        <small><strong>Client:</strong> <?php echo $tpl->escape((string) ($row['clientName'] ?? '')); ?></small><br/>
+                                                        <small><strong>Department:</strong> <?php echo $tpl->escape((string) ($row['departmentName'] ?? '')); ?></small>
+                                                    </div>
                                                     <div class="kanbanCardContent">
                                                         <h4><a href="#/tickets/showTicket/<?php echo $row['id']; ?>" data-hx-get="<?= BASE_URL?>/tickets/showTicket/<?php echo $row['id']; ?>" hx-swap="none" preload="mouseover"><?php $tpl->e($row['headline']); ?></a></h4>
 
@@ -234,15 +239,13 @@ $allTickets = $group['items'];
 
                                                     </div>
                                                     <div class="tw-flex">
-                                                    <?php if ($row['dateToFinish'] != '0000-00-00 00:00:00' && $row['dateToFinish'] != '1969-12-31 00:00:00') { ?>
                                                         <div>
                                                             <?php echo $tpl->__('label.due_icon'); ?>
-                                                            <input type="text" title="<?php echo $tpl->__('label.due'); ?>" value="<?php echo format($row['dateToFinish'])->date() ?>" class="duedates secretInput" style="margin-left:0px;" data-id="<?php echo $row['id']; ?>" name="date" />
+                                                            <input type="text" title="<?php echo $tpl->__('label.due'); ?>" value="<?php echo format($row['dateToFinish'])->date($tpl->__('text.anytime')) ?>" class="duedates secretInput" style="margin-left:0px;" data-id="<?php echo $row['id']; ?>" name="date" />
                                                         </div>
                                                         <div>
                                                             <?php $tpl->dispatchTplEvent('afterDates', ['ticket' => $row]); ?>
                                                         </div>
-                                                    <?php } ?>
                                                     </div>
                                                 </div>
                                             </div>

@@ -98,10 +98,13 @@ class Tickets
         $this->hasDepartmentAccessTables =
             Schema::hasTable('zp_org_project_departments')
             && Schema::hasTable('zp_org_user_departments')
+            && Schema::hasTable('zp_org_departments')
             && Schema::hasColumn('zp_org_project_departments', 'projectId')
             && Schema::hasColumn('zp_org_project_departments', 'departmentId')
             && Schema::hasColumn('zp_org_user_departments', 'userId')
-            && Schema::hasColumn('zp_org_user_departments', 'departmentId');
+            && Schema::hasColumn('zp_org_user_departments', 'departmentId')
+            && Schema::hasColumn('zp_org_departments', 'id')
+            && Schema::hasColumn('zp_org_departments', 'name');
 
         return $this->hasDepartmentAccessTables;
     }
@@ -389,6 +392,7 @@ class Tickets
                 'zp_sprints.name as sprintName',
                 'zp_projects.name as projectName',
                 'zp_clients.name as clientName',
+                'org_dept.name as departmentName',
                 'zp_clients.id as clientId',
                 't1.id as authorId',
                 't1.lastname as authorLastname',
@@ -440,6 +444,13 @@ class Tickets
                 '=',
                 'timesheet_agg.ticketId'
             );
+
+        if ($hasDepartmentTables) {
+            $query->leftJoin('zp_org_project_departments as opd_map', 'opd_map.projectId', '=', 'zp_projects.id')
+                ->leftJoin('zp_org_departments as org_dept', 'org_dept.id', '=', 'opd_map.departmentId');
+        } else {
+            $query->selectRaw("'' AS ".$this->dbHelper->wrapColumn('departmentName'));
+        }
 
         if ($includeCounts) {
             $query->leftJoinSub(
@@ -619,6 +630,7 @@ class Tickets
             'zp_sprints.name',
             'zp_projects.name',
             'zp_clients.name',
+            'org_dept.name',
             'zp_clients.id',
             't1.id',
             't1.lastname',
