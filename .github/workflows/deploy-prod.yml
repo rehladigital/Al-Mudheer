@@ -17,7 +17,7 @@ on:
 
 concurrency:
   group: deploy-prod-branch
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   deploy:
@@ -102,6 +102,7 @@ jobs:
 
       - name: Sync changed files to production (SFTP delta)
         if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.full_replace == 'true') }}
+        timeout-minutes: 8
         env:
           PROD_HOST: ${{ secrets.PROD_HOST }}
           PROD_PORT: ${{ secrets.PROD_PORT }}
@@ -118,6 +119,10 @@ jobs:
 
           lftp_cmd="/tmp/lftp-delta.cmd"
           {
+            echo "set net:timeout 20"
+            echo "set net:max-retries 2"
+            echo "set net:reconnect-interval-base 5"
+            echo "set net:reconnect-interval-max 15"
             echo "set sftp:auto-confirm yes"
             echo "set cmd:fail-exit yes"
             echo "open -u \"$PROD_USER\",\"$PROD_PASSWORD\" sftp://$PROD_HOST:$PROD_PORT"
@@ -138,10 +143,10 @@ jobs:
             echo "bye"
           } > "$lftp_cmd"
 
-          lftp -f "$lftp_cmd"
+          timeout 240s lftp -f "$lftp_cmd"
 
           if [ -s /tmp/delete_files.txt ]; then
-            sshpass -p "$PROD_PASSWORD" ssh -o StrictHostKeyChecking=no -p "$PROD_PORT" "$PROD_USER@$PROD_HOST" \
+            timeout 120s sshpass -p "$PROD_PASSWORD" ssh -o StrictHostKeyChecking=no -p "$PROD_PORT" "$PROD_USER@$PROD_HOST" \
               "cd '$PROD_REMOTE_PATH' && while IFS= read -r rel; do [ -n \"\$rel\" ] && rm -f -- \"\$rel\"; done" \
               < /tmp/delete_files.txt
           fi
