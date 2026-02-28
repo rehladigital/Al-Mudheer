@@ -54,6 +54,15 @@ We built **Al Mudheer** to provide teams worldwide with a robust, data-driven to
 
 ---
 
+## 📸 Product Screenshots
+
+![Al Mudheer UI 01](docs/images/almudheer-ui-01.png)
+![Al Mudheer UI 02](docs/images/almudheer-ui-02.png)
+![Al Mudheer UI 03](docs/images/almudheer-ui-03.png)
+![Al Mudheer UI 04](docs/images/almudheer-ui-04.png)
+![Al Mudheer UI 05](docs/images/almudheer-ui-05.png)
+![Al Mudheer UI 06](docs/images/almudheer-ui-06.png)
+
 ## 📸 Email Branding Screenshot
 
 Legacy email branding issue observed during notifications (Leantime logo fallback shown instead of Al Mudheer branding):
