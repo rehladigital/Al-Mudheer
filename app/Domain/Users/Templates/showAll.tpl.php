@@ -5,6 +5,7 @@ foreach ($__data as $var => $val) {
 }
 $roles = $tpl->get('roles');
 $orgRoles = $tpl->get('orgRoles') ?? [];
+$orgMappingRoles = $tpl->get('orgMappingRoles') ?? $orgRoles;
 $orgUnits = $tpl->get('orgUnits') ?? [];
 $orgUsers = $tpl->get('allUsers') ?? [];
 $orgClients = $tpl->get('orgClients') ?? [];
@@ -184,13 +185,14 @@ $orgRoleNamesByUser = $tpl->get('orgRoleNamesByUser') ?? [];
             <div class="row">
                 <div class="col-md-12">
                     <h5 class="widgettitle title-light"><span class="fa fa-users-gear"></span> User Role and Client Mapping</h5>
+                    <p style="margin-top:-8px; color:#666;">Department roles are limited to the four predefined global roles.</p>
                     <form method="post" action="<?= BASE_URL ?>/users/showAll#rbacUnitManagement">
                         <input type="hidden" name="saveUserMappings" value="1" />
                         <table class="table table-bordered table-striped">
                             <thead>
                                 <tr>
                                     <th>User</th>
-                                    <th>Business Role</th>
+                                    <th>Department Role</th>
                                     <th>Units</th>
                                     <th>Clients</th>
                                 </tr>
@@ -208,7 +210,7 @@ $orgRoleNamesByUser = $tpl->get('orgRoleNamesByUser') ?? [];
                                         <td>
                                             <select name="userBusinessRole[<?= $userId ?>]" style="width:220px;">
                                                 <option value="">-- Select role --</option>
-                                                <?php foreach ($orgRoles as $role) { ?>
+                                                <?php foreach ($orgMappingRoles as $role) { ?>
                                                     <?php $roleId = (int) ($role['id'] ?? 0); ?>
                                                     <option value="<?= $roleId ?>" <?= $mappedRoleId === $roleId ? 'selected="selected"' : '' ?>>
                                                         <?= $tpl->escape((string) ($role['name'] ?? '')) ?>

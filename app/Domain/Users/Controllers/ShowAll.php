@@ -51,6 +51,7 @@ class ShowAll extends Controller
             }
 
             $roles = $this->organizationRepo->getRoles();
+            $mappingRoles = $this->organizationRepo->getDepartmentRoles();
             $units = $this->organizationRepo->getDepartments();
             $userRoleMap = $this->organizationRepo->getUserRoleMap();
             $userClientMap = $this->organizationRepo->getUserClientMap();
@@ -71,6 +72,7 @@ class ShowAll extends Controller
             $this->tpl->assign('admin', true);
             $this->tpl->assign('roles', Roles::getRoles());
             $this->tpl->assign('orgRoles', $roles);
+            $this->tpl->assign('orgMappingRoles', $mappingRoles);
             $this->tpl->assign('orgUnits', $units);
             $this->tpl->assign('orgUserRoleMap', $userRoleMap);
             $this->tpl->assign('orgUserClientMap', $userClientMap);

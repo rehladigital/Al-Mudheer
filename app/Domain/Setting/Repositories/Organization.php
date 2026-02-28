@@ -43,6 +43,33 @@ class Organization
             ->toArray();
     }
 
+    public function getDepartmentRoles(): array
+    {
+        $roles = $this->getRoles();
+        if ($roles === []) {
+            return [];
+        }
+
+        $allowedSlugs = [
+            'department-manager',
+            'department-editor',
+            'department-commentor',
+            'department-readonly',
+        ];
+
+        $filtered = [];
+        foreach ($allowedSlugs as $slug) {
+            foreach ($roles as $role) {
+                if ((string) ($role['slug'] ?? '') === $slug) {
+                    $filtered[] = $role;
+                    break;
+                }
+            }
+        }
+
+        return $filtered;
+    }
+
     public function getRoleById(int $roleId): ?array
     {
         if ($roleId <= 0 || ! Schema::hasTable('zp_org_roles')) {
