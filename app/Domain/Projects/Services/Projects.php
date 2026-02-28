@@ -976,15 +976,31 @@ class Projects
         }
 
         $allProjects = $this->getProjectsAssignedToUser(session('userdata.id'));
-        if (empty($allProjects)) {
-            return;
+        foreach ($allProjects as $project) {
+            $projectId = (int) ($project['id'] ?? 0);
+            if ($projectId > 0 && $this->changeCurrentSessionProject($projectId) === true) {
+                return;
+            }
         }
 
-        if ($this->changeCurrentSessionProject($allProjects[0]['id']) === true) {
-            return;
+        // Fallback: try any project the user can access (not only direct assignments).
+        $accessibleProjects = $this->getProjectsUserHasAccessTo(session('userdata.id'));
+        if (is_array($accessibleProjects)) {
+            foreach ($accessibleProjects as $project) {
+                $projectId = (int) ($project['id'] ?? 0);
+                if ($projectId > 0 && $this->changeCurrentSessionProject($projectId) === true) {
+                    return;
+                }
+            }
         }
 
-        throw new \Exception('Error trying to set a project');
+        // Never crash request lifecycle from middleware.
+        session(['currentProject' => 0]);
+        session(['currentProjectName' => '']);
+        session(['currentProjectClient' => '']);
+        Log::warning('Could not resolve current project for user', [
+            'userId' => (int) (session('userdata.id') ?? 0),
+        ]);
     }
 
     /**
