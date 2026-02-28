@@ -61,12 +61,16 @@ class Header extends Composer
             $backgroundOpacity = 1;
         }
 
+        $assetVersion = $this->resolveAssetVersion(
+            (string) ($this->appSettings->assetVersion ?? ($this->appSettings->appVersion ?? ''))
+        );
+
         return [
             'sitename' => session('companysettings.sitename') ?? '',
             'primaryColor' => $this->themeCore->getPrimaryColor(),
             'theme' => $theme,
             'version' => $this->appSettings->appVersion ?? '',
-            'assetVersion' => $this->appSettings->assetVersion ?? ($this->appSettings->appVersion ?? ''),
+            'assetVersion' => $assetVersion,
             'themeScripts' => [
                 $this->themeCore->getJsUrl() ?? '',
                 $this->themeCore->getCustomJsUrl() ?? '',
@@ -91,5 +95,78 @@ class Header extends Composer
             'themeOpacity' => $backgroundOpacity,
             'themeType' => $this->themeCore->getBackgroundType(),
         ];
+    }
+
+    /**
+     * Resolve an asset version that actually exists on disk.
+     * Prevents global CSS/JS breakage when configured version mismatches deployed bundles.
+     */
+    private function resolveAssetVersion(string $preferredVersion): string
+    {
+        $candidates = array_values(array_unique(array_filter([
+            $preferredVersion,
+            (string) ($this->appSettings->appVersion ?? ''),
+        ])));
+
+        foreach ($candidates as $candidateVersion) {
+            if ($this->assetBundleExists($candidateVersion)) {
+                return $candidateVersion;
+            }
+        }
+
+        $detectedVersion = $this->detectLatestAssetVersionFromDisk();
+        if ($detectedVersion !== '') {
+            return $detectedVersion;
+        }
+
+        return $preferredVersion;
+    }
+
+    private function assetBundleExists(string $version): bool
+    {
+        if ($version === '') {
+            return false;
+        }
+
+        $mainCss = ROOT.'/dist/css/main.'.$version.'.min.css';
+        $appJs = ROOT.'/dist/js/compiled-app.'.$version.'.min.js';
+
+        return is_file($mainCss) && is_file($appJs);
+    }
+
+    private function detectLatestAssetVersionFromDisk(): string
+    {
+        $matches = glob(ROOT.'/dist/css/main.*.min.css');
+        if (! is_array($matches) || count($matches) === 0) {
+            return '';
+        }
+
+        $versions = [];
+        foreach ($matches as $file) {
+            if (! is_string($file) || $file === '') {
+                continue;
+            }
+
+            if (preg_match('/main\.(.+)\.min\.css$/', $file, $groups) !== 1) {
+                continue;
+            }
+
+            $candidate = (string) ($groups[1] ?? '');
+            if ($candidate === '' || ! $this->assetBundleExists($candidate)) {
+                continue;
+            }
+
+            $versions[] = $candidate;
+        }
+
+        if (count($versions) === 0) {
+            return '';
+        }
+
+        usort($versions, static function (string $a, string $b): int {
+            return version_compare($b, $a);
+        });
+
+        return $versions[0] ?? '';
     }
 }
