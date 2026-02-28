@@ -4,15 +4,6 @@ foreach ($__data as $var => $val) {
 }
 $companySettings = $tpl->get('companySettings');
 $smtpSettings = $tpl->get('smtpSettings') ?? [];
-$orgDepartments = $tpl->get('orgDepartments') ?? [];
-$orgRoles = $tpl->get('orgRoles') ?? [];
-$orgUsers = $tpl->get('orgUsers') ?? [];
-$orgClients = $tpl->get('orgClients') ?? [];
-$orgUserRoleMap = $tpl->get('orgUserRoleMap') ?? [];
-$orgUserClientMap = $tpl->get('orgUserClientMap') ?? [];
-$orgUserDepartmentMap = $tpl->get('orgUserDepartmentMap') ?? [];
-$orgRoleUsageCounts = $tpl->get('orgRoleUsageCounts') ?? [];
-$orgDepartmentUsageCounts = $tpl->get('orgDepartmentUsageCounts') ?? [];
 $cronCommand = $tpl->get('cronCommand') ?? '';
 ?>
 
@@ -35,7 +26,6 @@ $cronCommand = $tpl->get('cronCommand') ?? '';
 
                     <ul>
                         <li><a href="#details"><span class="fa fa-building"></span> <?php echo $tpl->__('tabs.details'); ?></a></li>
-                        <li><a href="#orgStructure"><span class="fa fa-sitemap"></span> Organization</a></li>
                         <li><a href="#smtpSettings"><span class="fa fa-envelope"></span> SMTP Settings</a></li>
                         <li><a href="#apiKeys"><i class="fa-solid fa-key"></i> <?php echo $tpl->__('tabs.apiKeys'); ?></a></li>
                         <?php $tpl->dispatchTplEvent('tabs') ?>
@@ -400,155 +390,6 @@ foreach ($relevanceLevels as $level => $labelKey) { ?>
                             </div>
                         </div>
                 </div>
-
-                    <div id="orgStructure">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h4 class="widgettitle title-light"><span class="fa fa-diagram-project"></span> Departments</h4>
-                                <form method="post" action="<?= BASE_URL ?>/setting/editCompanySettings#orgStructure" style="margin-bottom:12px;">
-                                    <input type="hidden" name="addDepartment" value="1" />
-                                    <input type="text" name="departmentName" placeholder="Add department name" style="width:70%;" />
-                                    <button type="submit" class="btn btn-primary">Add Department</button>
-                                </form>
-                                <table class="table table-bordered table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>Department</th>
-                                            <th>Mapped Users</th>
-                                            <th style="width:120px;">Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php foreach ($orgDepartments as $department) { ?>
-                                            <?php $did = (int) ($department['id'] ?? 0); ?>
-                                            <tr>
-                                                <td><?= $tpl->escape((string) ($department['name'] ?? '')) ?></td>
-                                                <td><?= (int) ($orgDepartmentUsageCounts[$did] ?? 0) ?></td>
-                                                <td>
-                                                    <form method="post" action="<?= BASE_URL ?>/setting/editCompanySettings#orgStructure" onsubmit="return confirm('Delete this department?');">
-                                                        <input type="hidden" name="deleteDepartment" value="1" />
-                                                        <input type="hidden" name="departmentId" value="<?= $did ?>" />
-                                                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                                                    </form>
-                                                </td>
-                                            </tr>
-                                        <?php } ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div class="col-md-6">
-                                <h4 class="widgettitle title-light"><span class="fa fa-user-shield"></span> Roles</h4>
-                                <form method="post" action="<?= BASE_URL ?>/setting/editCompanySettings#orgStructure" style="margin-bottom:12px;">
-                                    <input type="hidden" name="addRole" value="1" />
-                                    <input type="text" name="roleName" placeholder="Add role name" style="width:45%;" />
-                                    <select name="roleSystemRole" style="width:28%;">
-                                        <option value="5">Readonly (5)</option>
-                                        <option value="10">Commenter (10)</option>
-                                        <option value="20" selected="selected">Editor (20)</option>
-                                        <option value="30">Manager (30)</option>
-                                        <option value="40">Admin (40)</option>
-                                        <option value="50">Owner (50)</option>
-                                    </select>
-                                    <button type="submit" class="btn btn-primary">Add Role</button>
-                                </form>
-                                <table class="table table-bordered table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>Role</th>
-                                            <th>System Level</th>
-                                            <th>Mapped Users</th>
-                                            <th style="width:120px;">Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php foreach ($orgRoles as $role) { ?>
-                                            <?php $rid = (int) ($role['id'] ?? 0); ?>
-                                            <tr>
-                                                <td><?= $tpl->escape((string) ($role['name'] ?? '')) ?></td>
-                                                <td><?= (int) ($role['systemRole'] ?? 0) ?></td>
-                                                <td><?= (int) ($orgRoleUsageCounts[$rid] ?? 0) ?></td>
-                                                <td>
-                                                    <?php if ((int) ($role['isProtected'] ?? 0) === 1) { ?>
-                                                        <span class="label label-info">Protected</span>
-                                                    <?php } else { ?>
-                                                        <form method="post" action="<?= BASE_URL ?>/setting/editCompanySettings#orgStructure" onsubmit="return confirm('Delete this role?');">
-                                                            <input type="hidden" name="deleteRole" value="1" />
-                                                            <input type="hidden" name="roleId" value="<?= $rid ?>" />
-                                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                                                        </form>
-                                                    <?php } ?>
-                                                </td>
-                                            </tr>
-                                        <?php } ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-12">
-                                <h4 class="widgettitle title-light"><span class="fa fa-users-gear"></span> User Role and Client Mapping</h4>
-                                <form method="post" action="<?= BASE_URL ?>/setting/editCompanySettings#orgStructure">
-                                    <input type="hidden" name="saveUserMappings" value="1" />
-                                    <table class="table table-bordered table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th>User</th>
-                                                <th>Business Role</th>
-                                                <th>Departments</th>
-                                                <th>Clients</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <?php foreach ($orgUsers as $user) { ?>
-                                                <?php
-                                                    $uid = (int) ($user['id'] ?? 0);
-                                                    $mappedRoleId = (int) ($orgUserRoleMap[$uid] ?? 0);
-                                                    $mappedDepartmentIds = $orgUserDepartmentMap[$uid] ?? [];
-                                                    $mappedClientIds = $orgUserClientMap[$uid] ?? [];
-                                                ?>
-                                                <tr>
-                                                    <td><?= $tpl->escape((string) (($user['firstname'] ?? '').' '.($user['lastname'] ?? '').' <'.($user['username'] ?? '').'>')) ?></td>
-                                                    <td>
-                                                        <select name="userBusinessRole[<?= $uid ?>]" style="width: 220px;">
-                                                            <option value="">-- Select role --</option>
-                                                            <?php foreach ($orgRoles as $role) { ?>
-                                                                <?php $rid = (int) ($role['id'] ?? 0); ?>
-                                                                <option value="<?= $rid ?>" <?= $mappedRoleId === $rid ? 'selected="selected"' : '' ?>>
-                                                                    <?= $tpl->escape((string) ($role['name'] ?? '')) ?>
-                                                                </option>
-                                                            <?php } ?>
-                                                        </select>
-                                                    </td>
-                                                    <td>
-                                                        <select name="userDepartments[<?= $uid ?>][]" multiple="multiple" style="width: 260px;">
-                                                            <?php foreach ($orgDepartments as $department) { ?>
-                                                                <?php $did = (int) ($department['id'] ?? 0); ?>
-                                                                <option value="<?= $did ?>" <?= in_array($did, $mappedDepartmentIds, true) ? 'selected="selected"' : '' ?>>
-                                                                    <?= $tpl->escape((string) ($department['name'] ?? '')) ?>
-                                                                </option>
-                                                            <?php } ?>
-                                                        </select>
-                                                    </td>
-                                                    <td>
-                                                        <select name="userClients[<?= $uid ?>][]" multiple="multiple" style="width: 260px;">
-                                                            <?php foreach ($orgClients as $client) { ?>
-                                                                <?php $cid = (int) ($client['id'] ?? 0); ?>
-                                                                <option value="<?= $cid ?>" <?= in_array($cid, $mappedClientIds, true) ? 'selected="selected"' : '' ?>>
-                                                                    <?= $tpl->escape((string) ($client['name'] ?? '')) ?>
-                                                                </option>
-                                                            <?php } ?>
-                                                        </select>
-                                                    </td>
-                                                </tr>
-                                            <?php } ?>
-                                        </tbody>
-                                    </table>
-                                    <button type="submit" class="btn btn-primary">Save Mappings</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
 
                     <div id="smtpSettings">
                         <div class="row">

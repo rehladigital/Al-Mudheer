@@ -81,6 +81,7 @@ class Install
         30413,
         30500,
         30510,
+        30511,
     ];
 
     /**
@@ -2568,14 +2569,10 @@ class Install
             }
 
             $seedRoles = [
-                ['name' => 'Owner', 'slug' => 'owner', 'systemRole' => 50, 'isProtected' => 1],
-                ['name' => 'Admin', 'slug' => 'admin', 'systemRole' => 40, 'isProtected' => 1],
-                ['name' => 'Manager', 'slug' => 'manager', 'systemRole' => 30, 'isProtected' => 1],
-                ['name' => 'Editor', 'slug' => 'editor', 'systemRole' => 20, 'isProtected' => 1],
-                ['name' => 'Commenter', 'slug' => 'commenter', 'systemRole' => 10, 'isProtected' => 1],
-                ['name' => 'Readonly', 'slug' => 'readonly', 'systemRole' => 5, 'isProtected' => 1],
-                ['name' => 'Company Manager', 'slug' => 'company-manager', 'systemRole' => 40, 'isProtected' => 1],
                 ['name' => 'Department Manager', 'slug' => 'department-manager', 'systemRole' => 30, 'isProtected' => 1],
+                ['name' => 'Department Editor', 'slug' => 'department-editor', 'systemRole' => 20, 'isProtected' => 1],
+                ['name' => 'Department Commentor', 'slug' => 'department-commentor', 'systemRole' => 10, 'isProtected' => 1],
+                ['name' => 'Department ReadOnly', 'slug' => 'department-readonly', 'systemRole' => 5, 'isProtected' => 1],
             ];
 
             foreach ($seedRoles as $role) {
@@ -2599,12 +2596,10 @@ class Install
                     $systemRole = (int) ($user->role ?? 20);
 
                     $slug = match (true) {
-                        $systemRole >= 50 => 'owner',
-                        $systemRole >= 40 => 'admin',
-                        $systemRole >= 30 => 'company-manager',
-                        $systemRole >= 20 => 'editor',
-                        $systemRole >= 10 => 'commenter',
-                        default => 'readonly',
+                        $systemRole >= 30 => 'department-manager',
+                        $systemRole >= 20 => 'department-editor',
+                        $systemRole >= 10 => 'department-commentor',
+                        default => 'department-readonly',
                     };
 
                     $roleId = (int) $this->connection->table('zp_org_roles')->where('slug', $slug)->value('id');
@@ -2637,6 +2632,85 @@ class Install
             Log::error('Migration 30510: '.$e->getMessage());
 
             return ['Migration 30510 failed. Please review logs.'];
+        }
+    }
+
+    /**
+     * Migration 30511: Enforce Unit role defaults and remap existing user role mappings.
+     */
+    public function update_sql_30511(): bool|array
+    {
+        try {
+            if (! Schema::hasTable('zp_org_roles') || ! Schema::hasTable('zp_org_user_roles') || ! Schema::hasTable('zp_user')) {
+                return true;
+            }
+
+            $requiredRoles = [
+                ['name' => 'Department Manager', 'slug' => 'department-manager', 'systemRole' => 30],
+                ['name' => 'Department Editor', 'slug' => 'department-editor', 'systemRole' => 20],
+                ['name' => 'Department Commentor', 'slug' => 'department-commentor', 'systemRole' => 10],
+                ['name' => 'Department ReadOnly', 'slug' => 'department-readonly', 'systemRole' => 5],
+            ];
+
+            foreach ($requiredRoles as $role) {
+                $exists = $this->connection->table('zp_org_roles')->where('slug', $role['slug'])->exists();
+                if (! $exists) {
+                    $this->connection->table('zp_org_roles')->insert([
+                        'name' => $role['name'],
+                        'slug' => $role['slug'],
+                        'systemRole' => $role['systemRole'],
+                        'isProtected' => 1,
+                        'createdOn' => date('Y-m-d H:i:s'),
+                        'updatedOn' => date('Y-m-d H:i:s'),
+                    ]);
+                }
+            }
+
+            $roleBySlug = [];
+            $rows = $this->connection->table('zp_org_roles')
+                ->whereIn('slug', ['department-manager', 'department-editor', 'department-commentor', 'department-readonly'])
+                ->get(['id', 'slug']);
+            foreach ($rows as $row) {
+                $roleBySlug[(string) $row->slug] = (int) $row->id;
+            }
+
+            $users = $this->connection->table('zp_user')->select(['id', 'role'])->get();
+            foreach ($users as $user) {
+                $userId = (int) $user->id;
+                $systemRole = (int) ($user->role ?? 20);
+                $targetSlug = match (true) {
+                    $systemRole >= 30 => 'department-manager',
+                    $systemRole >= 20 => 'department-editor',
+                    $systemRole >= 10 => 'department-commentor',
+                    default => 'department-readonly',
+                };
+                $targetRoleId = (int) ($roleBySlug[$targetSlug] ?? 0);
+                if ($targetRoleId > 0) {
+                    $this->connection->table('zp_org_user_roles')->updateOrInsert(
+                        ['userId' => $userId],
+                        ['roleId' => $targetRoleId, 'updatedOn' => date('Y-m-d H:i:s')]
+                    );
+                }
+            }
+
+            $legacySlugs = ['owner', 'admin', 'manager', 'editor', 'commenter', 'readonly', 'company-manager'];
+            foreach ($legacySlugs as $slug) {
+                $legacyRole = $this->connection->table('zp_org_roles')->where('slug', $slug)->first();
+                if (! $legacyRole) {
+                    continue;
+                }
+                $legacyRoleId = (int) $legacyRole->id;
+                $isMapped = $this->connection->table('zp_org_user_roles')->where('roleId', $legacyRoleId)->exists();
+                if (! $isMapped) {
+                    $this->connection->table('zp_org_roles')->where('id', $legacyRoleId)->delete();
+                }
+            }
+
+            return true;
+        } catch (\Throwable $e) {
+            Log::error('Migration 30511: '.$e->getMessage());
+
+            return ['Migration 30511 failed. Please review logs.'];
         }
     }
 }

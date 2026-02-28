@@ -127,17 +127,13 @@ class SchemaBuilder
         ]);
 
         DB::table('zp_org_roles')->insert([
-            ['name' => 'Owner', 'slug' => 'owner', 'systemRole' => 50, 'isProtected' => 1, 'createdOn' => now(), 'updatedOn' => now()],
-            ['name' => 'Admin', 'slug' => 'admin', 'systemRole' => 40, 'isProtected' => 1, 'createdOn' => now(), 'updatedOn' => now()],
-            ['name' => 'Manager', 'slug' => 'manager', 'systemRole' => 30, 'isProtected' => 1, 'createdOn' => now(), 'updatedOn' => now()],
-            ['name' => 'Editor', 'slug' => 'editor', 'systemRole' => 20, 'isProtected' => 1, 'createdOn' => now(), 'updatedOn' => now()],
-            ['name' => 'Commenter', 'slug' => 'commenter', 'systemRole' => 10, 'isProtected' => 1, 'createdOn' => now(), 'updatedOn' => now()],
-            ['name' => 'Readonly', 'slug' => 'readonly', 'systemRole' => 5, 'isProtected' => 1, 'createdOn' => now(), 'updatedOn' => now()],
-            ['name' => 'Company Manager', 'slug' => 'company-manager', 'systemRole' => 40, 'isProtected' => 1, 'createdOn' => now(), 'updatedOn' => now()],
             ['name' => 'Department Manager', 'slug' => 'department-manager', 'systemRole' => 30, 'isProtected' => 1, 'createdOn' => now(), 'updatedOn' => now()],
+            ['name' => 'Department Editor', 'slug' => 'department-editor', 'systemRole' => 20, 'isProtected' => 1, 'createdOn' => now(), 'updatedOn' => now()],
+            ['name' => 'Department Commentor', 'slug' => 'department-commentor', 'systemRole' => 10, 'isProtected' => 1, 'createdOn' => now(), 'updatedOn' => now()],
+            ['name' => 'Department ReadOnly', 'slug' => 'department-readonly', 'systemRole' => 5, 'isProtected' => 1, 'createdOn' => now(), 'updatedOn' => now()],
         ]);
 
-        $ownerRoleId = (int) DB::table('zp_org_roles')->where('slug', 'owner')->value('id');
+        $ownerRoleId = (int) DB::table('zp_org_roles')->where('slug', 'department-manager')->value('id');
         if ($ownerRoleId > 0) {
             DB::table('zp_org_user_roles')->insert([
                 'userId' => 1,

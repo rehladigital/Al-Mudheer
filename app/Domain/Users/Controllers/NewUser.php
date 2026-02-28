@@ -8,6 +8,7 @@ use Leantime\Domain\Auth\Models\Roles;
 use Leantime\Domain\Auth\Services\Auth;
 use Leantime\Domain\Clients\Repositories\Clients as ClientRepository;
 use Leantime\Domain\Projects\Repositories\Projects as ProjectRepository;
+use Leantime\Domain\Setting\Repositories\Organization as OrganizationRepository;
 use Leantime\Domain\Setting\Services\Setting;
 use Leantime\Domain\Users\Repositories\Users as UserRepository;
 use Leantime\Domain\Users\Services\Users as UserService;
@@ -24,6 +25,8 @@ class NewUser extends Controller
 
     private Environment $config;
 
+    private OrganizationRepository $organizationRepo;
+
     /**
      * init - initialize private variables
      */
@@ -32,13 +35,15 @@ class NewUser extends Controller
         ProjectRepository $projectsRepo,
         UserService $userService,
         Setting $settingService,
-        Environment $config
+        Environment $config,
+        OrganizationRepository $organizationRepo
     ) {
         $this->userRepo = $userRepo;
         $this->projectsRepo = $projectsRepo;
         $this->userService = $userService;
         $this->settingService = $settingService;
         $this->config = $config;
+        $this->organizationRepo = $organizationRepo;
     }
 
     /**
@@ -72,6 +77,7 @@ class NewUser extends Controller
             'jobTitle' => '',
             'jobLevel' => '',
             'department' => '',
+            'businessRoleId' => '',
 
         ];
 
@@ -91,9 +97,34 @@ class NewUser extends Controller
                     'status' => '',
                     'jobTitle' => ($_POST['jobTitle']),
                     'jobLevel' => ($_POST['jobLevel']),
-                    'department' => ($_POST['department']),
-                    'clientId' => Auth::userHasRole(Roles::$manager) ? session('userdata.clientId') : $_POST['client'],
+                    'department' => ($_POST['department'] ?? ''),
+                    'clientId' => 0,
+                    'businessRoleId' => (int) ($_POST['businessRoleId'] ?? 0),
                 ];
+
+                $mappedClientIds = array_values(array_unique(array_map('intval', (array) ($_POST['userClients'] ?? []))));
+                if (Auth::userHasRole(Roles::$manager)) {
+                    $mappedClientIds = [(int) session('userdata.clientId')];
+                }
+                $values['clientId'] = (int) ($mappedClientIds[0] ?? 0);
+
+                $mappedUnitIds = array_values(array_unique(array_map('intval', (array) ($_POST['userUnits'] ?? []))));
+                $primaryUnitName = '';
+                if (count($mappedUnitIds) > 0) {
+                    $primaryUnit = $this->organizationRepo->getDepartmentById((int) $mappedUnitIds[0]);
+                    $primaryUnitName = (string) ($primaryUnit['name'] ?? '');
+                }
+                $values['department'] = $primaryUnitName;
+
+                $businessRole = $this->organizationRepo->getRoleById((int) $values['businessRoleId']);
+                $values['role'] = (int) ($businessRole['systemRole'] ?? 20);
+
+                if ((int) $values['businessRoleId'] <= 0 || $businessRole === null) {
+                    $this->tpl->setNotification('Please select a valid role.', 'error');
+                    $this->tpl->assign('values', $values);
+
+                    return $this->tpl->displayPartial('users.newUser');
+                }
                 if (isset($_POST['projects']) && is_array($_POST['projects'])) {
                     foreach ($_POST['projects'] as $project) {
                         $projectrelation[] = $project;
@@ -104,6 +135,12 @@ class NewUser extends Controller
                     if (filter_var($values['user'], FILTER_VALIDATE_EMAIL)) {
                         if ($this->userRepo->usernameExist($values['user']) === false) {
                             $userId = $this->userService->createUserInvite($values);
+
+                            $this->organizationRepo->saveUserAccessMappings(
+                                [$userId => (int) $values['businessRoleId']],
+                                [$userId => $mappedClientIds],
+                                [$userId => $mappedUnitIds]
+                            );
 
                             // Update Project Relationships
                             if (isset($_POST['projects']) && count($_POST['projects']) > 0) {
@@ -146,6 +183,8 @@ class NewUser extends Controller
             $this->tpl->assign('clients', $clients->getAll());
             $this->tpl->assign('allProjects', $this->projectsRepo->getAll());
             $this->tpl->assign('roles', Roles::getRoles());
+            $this->tpl->assign('orgRoles', $this->organizationRepo->getRoles());
+            $this->tpl->assign('orgUnits', $this->organizationRepo->getDepartments());
 
             $this->tpl->assign('relations', $projectrelation);
 

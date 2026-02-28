@@ -10,13 +10,10 @@ use Leantime\Core\UI\Theme;
 use Leantime\Domain\Api\Services\Api as ApiService;
 use Leantime\Domain\Auth\Models\Roles;
 use Leantime\Domain\Auth\Services\Auth;
-use Leantime\Domain\Clients\Repositories\Clients as ClientRepository;
 use Leantime\Domain\Notifications\Models\Notification;
 use Leantime\Domain\Reports\Services\Reports as ReportService;
-use Leantime\Domain\Setting\Repositories\Organization as OrganizationRepository;
 use Leantime\Domain\Setting\Repositories\Setting as SettingRepository;
 use Leantime\Domain\Setting\Services\Setting as SettingService;
-use Leantime\Domain\Users\Repositories\Users as UserRepository;
 
 class EditCompanySettings extends Controller
 {
@@ -30,12 +27,6 @@ class EditCompanySettings extends Controller
 
     private Environment $config;
 
-    private OrganizationRepository $organizationRepo;
-
-    private UserRepository $usersRepo;
-
-    private ClientRepository $clientsRepo;
-
     /**
      * constructor - initialize private variables
      */
@@ -45,9 +36,6 @@ class EditCompanySettings extends Controller
         SettingService $settingsSvc,
         Theme $theme,
         Environment $config,
-        OrganizationRepository $organizationRepo,
-        UserRepository $usersRepo,
-        ClientRepository $clientsRepo,
 
     ) {
         Auth::authOrRedirect([Roles::$owner, Roles::$admin], true);
@@ -57,9 +45,6 @@ class EditCompanySettings extends Controller
         $this->settingsSvc = $settingsSvc;
         $this->theme = $theme;
         $this->config = $config;
-        $this->organizationRepo = $organizationRepo;
-        $this->usersRepo = $usersRepo;
-        $this->clientsRepo = $clientsRepo;
     }
 
     /**
@@ -187,30 +172,12 @@ class EditCompanySettings extends Controller
             'sslNoVerify' => $this->toBool($this->settingsRepo->getSetting('companysettings.smtp.sslNoVerify') ?: (($this->config->smtpSSLNoverify ?? false) ? 'true' : 'false')),
         ];
 
-        $departments = $this->organizationRepo->getDepartments();
-        $roles = $this->organizationRepo->getRoles();
-        $users = $this->usersRepo->getAll();
-        $clients = $this->clientsRepo->getAll();
-        $userRoleMap = $this->organizationRepo->getUserRoleMap();
-        $userClientMap = $this->organizationRepo->getUserClientMap();
-        $userDepartmentMap = $this->organizationRepo->getUserDepartmentMap();
-        $roleUsageCounts = $this->organizationRepo->getRoleUsageCounts();
-        $departmentUsageCounts = $this->organizationRepo->getDepartmentUsageCounts();
         $cronCommand = (is_file('/opt/alt/php83/usr/bin/php') ? '/opt/alt/php83/usr/bin/php' : 'php').' '.APP_ROOT.'/bin/leantime schedule:run';
 
         $this->tpl->assign('apiKeys', $apiKeys);
         $this->tpl->assign('languageList', $this->language->getLanguageList());
         $this->tpl->assign('companySettings', $companySettings);
         $this->tpl->assign('smtpSettings', $smtp);
-        $this->tpl->assign('orgDepartments', $departments);
-        $this->tpl->assign('orgRoles', $roles);
-        $this->tpl->assign('orgUsers', $users);
-        $this->tpl->assign('orgClients', $clients);
-        $this->tpl->assign('orgUserRoleMap', $userRoleMap);
-        $this->tpl->assign('orgUserClientMap', $userClientMap);
-        $this->tpl->assign('orgUserDepartmentMap', $userDepartmentMap);
-        $this->tpl->assign('orgRoleUsageCounts', $roleUsageCounts);
-        $this->tpl->assign('orgDepartmentUsageCounts', $departmentUsageCounts);
         $this->tpl->assign('cronCommand', $cronCommand);
         $this->tpl->assign('notificationCategories', Notification::NOTIFICATION_CATEGORIES);
         $this->tpl->assign('defaultNotificationTypes', $defaultNotificationTypes);
@@ -228,68 +195,6 @@ class EditCompanySettings extends Controller
      */
     public function post($params)
     {
-        if (isset($params['addDepartment'])) {
-            $name = trim((string) ($params['departmentName'] ?? ''));
-            if ($name === '') {
-                $this->tpl->setNotification('Department name is required.', 'error');
-            } else {
-                $this->organizationRepo->addDepartment($name);
-                $this->tpl->setNotification('Department added successfully.', 'success');
-            }
-
-            return Frontcontroller::redirect(BASE_URL.'/setting/editCompanySettings#orgStructure');
-        }
-
-        if (isset($params['addRole'])) {
-            $name = trim((string) ($params['roleName'] ?? ''));
-            $systemRole = (int) ($params['roleSystemRole'] ?? 20);
-            if ($name === '') {
-                $this->tpl->setNotification('Role name is required.', 'error');
-            } else {
-                $this->organizationRepo->addRole($name, $systemRole);
-                $this->tpl->setNotification('Role added successfully.', 'success');
-            }
-
-            return Frontcontroller::redirect(BASE_URL.'/setting/editCompanySettings#orgStructure');
-        }
-
-        if (isset($params['deleteRole'])) {
-            $roleId = (int) ($params['roleId'] ?? 0);
-            if ($roleId <= 0 || ! $this->organizationRepo->deleteRole($roleId)) {
-                $this->tpl->setNotification('Role cannot be deleted while mapped to users or protected.', 'error');
-            } else {
-                $this->tpl->setNotification('Role deleted successfully.', 'success');
-            }
-
-            return Frontcontroller::redirect(BASE_URL.'/setting/editCompanySettings#orgStructure');
-        }
-
-        if (isset($params['deleteDepartment'])) {
-            $departmentId = (int) ($params['departmentId'] ?? 0);
-            if ($departmentId <= 0 || ! $this->organizationRepo->deleteDepartment($departmentId)) {
-                $this->tpl->setNotification('Department cannot be deleted while mapped to users/clients/projects.', 'error');
-            } else {
-                $this->tpl->setNotification('Department deleted successfully.', 'success');
-            }
-
-            return Frontcontroller::redirect(BASE_URL.'/setting/editCompanySettings#orgStructure');
-        }
-
-        if (isset($params['saveUserMappings'])) {
-            try {
-                $roleByUser = (array) ($params['userBusinessRole'] ?? []);
-                $clientsByUser = (array) ($params['userClients'] ?? []);
-                $departmentsByUser = (array) ($params['userDepartments'] ?? []);
-                $this->organizationRepo->saveUserAccessMappings($roleByUser, $clientsByUser, $departmentsByUser);
-                $this->tpl->setNotification('User role/client/department mappings updated.', 'success');
-            } catch (\Throwable $e) {
-                report($e);
-                $this->tpl->setNotification('Could not save user mappings. Please check logs.', 'error');
-            }
-
-            return Frontcontroller::redirect(BASE_URL.'/setting/editCompanySettings#orgStructure');
-        }
-
         if (isset($params['saveSmtpSettings'])) {
             $this->settingsRepo->saveSetting('companysettings.smtp.fromEmail', trim((string) ($params['smtpFromEmail'] ?? '')));
             $this->settingsRepo->saveSetting('companysettings.smtp.useSMTP', isset($params['smtpUseSMTP']) ? 'true' : 'false');

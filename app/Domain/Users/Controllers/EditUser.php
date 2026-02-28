@@ -8,6 +8,7 @@ use Leantime\Domain\Auth\Models\Roles;
 use Leantime\Domain\Auth\Services\Auth;
 use Leantime\Domain\Clients\Repositories\Clients as ClientRepository;
 use Leantime\Domain\Projects\Repositories\Projects as ProjectRepository;
+use Leantime\Domain\Setting\Repositories\Organization as OrganizationRepository;
 use Leantime\Domain\Users\Repositories\Users as UserRepository;
 use Leantime\Domain\Users\Services\Users;
 use Ramsey\Uuid\Uuid;
@@ -22,6 +23,8 @@ class EditUser extends Controller
 
     private Users $userService;
 
+    private OrganizationRepository $organizationRepo;
+
     /**
      * init - initialize private variables
      */
@@ -29,12 +32,14 @@ class EditUser extends Controller
         ProjectRepository $projectsRepo,
         UserRepository $userRepo,
         ClientRepository $clientsRepo,
-        Users $userService
+        Users $userService,
+        OrganizationRepository $organizationRepo
     ) {
         $this->projectsRepo = $projectsRepo;
         $this->userRepo = $userRepo;
         $this->clientsRepo = $clientsRepo;
         $this->userService = $userService;
+        $this->organizationRepo = $organizationRepo;
     }
 
     /**
@@ -70,8 +75,12 @@ class EditUser extends Controller
                 'jobTitle' => $row['jobTitle'],
                 'jobLevel' => $row['jobLevel'],
                 'department' => $row['department'],
+                'businessRoleId' => 0,
 
             ];
+
+            $userRoleMap = $this->organizationRepo->getUserRoleMap();
+            $values['businessRoleId'] = (int) ($userRoleMap[$id] ?? 0);
 
             if (isset($_GET['resendInvite']) && $row !== false) {
                 if (! session()->exists('lastInvite.'.$values['id']) ||
@@ -115,8 +124,28 @@ class EditUser extends Controller
                         'pwReset' => $row['pwReset'],
                         'jobTitle' => ($_POST['jobTitle'] ?? $row['jobTitle']),
                         'jobLevel' => ($_POST['jobLevel'] ?? $row['jobLevel']),
-                        'department' => ($_POST['department'] ?? $row['department']),
+                        'department' => '',
+                        'businessRoleId' => (int) ($_POST['businessRoleId'] ?? $values['businessRoleId']),
                     ];
+
+                    $mappedClientIds = array_values(array_unique(array_map('intval', (array) ($_POST['userClients'] ?? []))));
+                    $values['clientId'] = (int) ($mappedClientIds[0] ?? 0);
+
+                    $mappedUnitIds = array_values(array_unique(array_map('intval', (array) ($_POST['userUnits'] ?? []))));
+                    $primaryUnitName = '';
+                    if (count($mappedUnitIds) > 0) {
+                        $primaryUnit = $this->organizationRepo->getDepartmentById((int) $mappedUnitIds[0]);
+                        $primaryUnitName = (string) ($primaryUnit['name'] ?? '');
+                    }
+                    $values['department'] = $primaryUnitName;
+
+                    $businessRole = $this->organizationRepo->getRoleById((int) $values['businessRoleId']);
+                    $values['role'] = (int) ($businessRole['systemRole'] ?? $row['role']);
+
+                    if ((int) $values['businessRoleId'] <= 0 || $businessRole === null) {
+                        $this->tpl->setNotification('Please select a valid role.', 'error');
+                        $edit = false;
+                    }
 
                     $changedEmail = 0;
 
@@ -153,6 +182,11 @@ class EditUser extends Controller
             // Was everything okay?
             if ($edit !== false) {
                 $this->userRepo->editUser($values, $id);
+                $this->organizationRepo->saveUserAccessMappings(
+                    [$id => (int) ($values['businessRoleId'] ?? 0)],
+                    [$id => $mappedClientIds ?? []],
+                    [$id => $mappedUnitIds ?? []]
+                );
 
                 if (isset($_POST['projects'])) {
                     if ($_POST['projects'][0] !== '0') {
@@ -180,6 +214,10 @@ class EditUser extends Controller
             $this->tpl->assign('allProjects', $this->projectsRepo->getAll(true));
             $this->tpl->assign('roles', Roles::getRoles());
             $this->tpl->assign('clients', $this->clientsRepo->getAll());
+            $this->tpl->assign('orgRoles', $this->organizationRepo->getRoles());
+            $this->tpl->assign('orgUnits', $this->organizationRepo->getDepartments());
+            $this->tpl->assign('orgUserClientMap', $this->organizationRepo->getUserClientMap());
+            $this->tpl->assign('orgUserUnitMap', $this->organizationRepo->getUserDepartmentMap());
 
             // Sensitive Form, generate form tokens
             $permitted_chars = '0123456789abcdefghijklmnopqrstuvwxyz';

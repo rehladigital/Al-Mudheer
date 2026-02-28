@@ -132,9 +132,9 @@ $project = $tpl->get('project');
 
                             <div style="margin-bottom: 30px;">
                                 <div class="">
-                                    <h4 class="widgettitle title-light"><span class="fa fa-diagram-project"></span> Department</h4>
+                                    <h4 class="widgettitle title-light"><span class="fa fa-diagram-project"></span> Unit</h4>
                                     <select name="departmentId" id="departmentId" <?= ! empty($tpl->get('isDepartmentManager')) ? 'required="required"' : '' ?>>
-                                        <option value="0">-- Select Department --</option>
+                                        <option value="0">-- Select Unit --</option>
                                         <?php foreach (($tpl->get('availableDepartments') ?? []) as $department) { ?>
                                             <option value="<?php echo (int) $department['id']; ?>"
                                                 <?php if ((int) ($project['departmentId'] ?? 0) === (int) $department['id']) { ?>
@@ -144,7 +144,7 @@ $project = $tpl->get('project');
                                         <?php } ?>
                                     </select>
                                     <?php if (! empty($tpl->get('isDepartmentManager'))) { ?>
-                                        <small>Department Manager must select an assigned department.</small>
+                                        <small>Department Manager must select an assigned unit.</small>
                                     <?php } ?>
                                 </div>
                             </div>

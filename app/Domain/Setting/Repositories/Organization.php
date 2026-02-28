@@ -43,6 +43,32 @@ class Organization
             ->toArray();
     }
 
+    public function getRoleById(int $roleId): ?array
+    {
+        if ($roleId <= 0 || ! Schema::hasTable('zp_org_roles')) {
+            return null;
+        }
+
+        $row = $this->db->table('zp_org_roles')
+            ->where('id', $roleId)
+            ->first();
+
+        return $row ? (array) $row : null;
+    }
+
+    public function getDepartmentById(int $departmentId): ?array
+    {
+        if ($departmentId <= 0 || ! Schema::hasTable('zp_org_departments')) {
+            return null;
+        }
+
+        $row = $this->db->table('zp_org_departments')
+            ->where('id', $departmentId)
+            ->first();
+
+        return $row ? (array) $row : null;
+    }
+
     public function addDepartment(string $name): int
     {
         if (! Schema::hasTable('zp_org_departments')) {

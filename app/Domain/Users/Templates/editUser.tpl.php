@@ -5,6 +5,10 @@ foreach ($__data as $var => $val) {
 $status = $tpl->get('status');
 $values = $tpl->get('values');
 $projects = $tpl->get('relations');
+$orgUserClientMap = $tpl->get('orgUserClientMap') ?? [];
+$orgUserUnitMap = $tpl->get('orgUserUnitMap') ?? [];
+$mappedClientIds = $orgUserClientMap[(int) ($values['id'] ?? 0)] ?? [];
+$mappedUnitIds = $orgUserUnitMap[(int) ($values['id'] ?? 0)] ?? [];
 ?>
 
 <?php echo $tpl->displayNotification(); ?>
@@ -35,18 +39,18 @@ $projects = $tpl->get('relations');
 
 
 
-                    <label for="role"><?php echo $tpl->__('label.role'); ?></label>
-                    <select name="role" id="role">
-
-                        <?php foreach ($tpl->get('roles') as $key => $role) { ?>
-                            <option value="<?php echo $key; ?>"
-                                <?php if ($key == $values['role']) {
-                                    ?> selected="selected" <?php
-                                } ?>>
-                                <?= $tpl->__('label.roles.'.$role) ?>
+                    <label for="businessRoleId"><?php echo $tpl->__('label.role'); ?></label>
+                    <select name="businessRoleId" id="businessRoleId">
+                        <option value="">-- Select role --</option>
+                        <?php foreach (($tpl->get('orgRoles') ?? []) as $role) { ?>
+                            <option value="<?php echo (int) $role['id']; ?>"
+                                <?php if ((int) ($role['id'] ?? 0) === (int) ($values['businessRoleId'] ?? 0)) { ?>
+                                    selected="selected"
+                                <?php } ?>
+                            >
+                                <?php $tpl->e($role['name']); ?>
                             </option>
                         <?php } ?>
-
                     </select> <br />
 
                     <label for="status"><?php echo $tpl->__('label.status'); ?></label>
@@ -90,14 +94,12 @@ $projects = $tpl->get('relations');
 
 
 
-                    <label for="client"><?php echo $tpl->__('label.client') ?></label>
-                    <select name='client' id="client">
-                        <?php if ($login::userIsAtLeast('manager')) {?>
-                            <option value="0" selected="selected"><?php echo $tpl->__('label.no_clients') ?></option>
-                        <?php } ?>
+                    <label for="userClients"><?php echo $tpl->__('label.client') ?>s</label>
+                    <select name='userClients[]' id="userClients" multiple="multiple">
                         <?php foreach ($tpl->get('clients') as $client) { ?>
-                            <option value="<?php echo $client['id'] ?>" <?php if ($client['id'] == $values['clientId']) {
-                                ?>selected="selected"<?php
+                            <?php $clientId = (int) ($client['id'] ?? 0); ?>
+                            <option value="<?php echo $clientId ?>" <?php if (in_array($clientId, $mappedClientIds, true) || $clientId === (int) $values['clientId']) { ?>
+                                selected="selected"<?php
                             } ?>><?php $tpl->e($client['name']) ?></option>
                         <?php } ?>
                     </select><br/>
@@ -120,8 +122,15 @@ $projects = $tpl->get('relations');
                         <label for="jobLevel"><?php echo $tpl->__('label.jobLevel'); ?></label> <input
                             type="text" name="jobLevel" id="jobLevel" value="<?php echo $tpl->escape($values['jobLevel']) ?>" /><br />
 
-                        <label for="department"><?php echo $tpl->__('label.department'); ?></label> <input
-                            type="text" name="department" id="department" value="<?php echo $tpl->escape($values['department']) ?>" /><br />
+                        <label for="userUnits">Units</label>
+                        <select name="userUnits[]" id="userUnits" multiple="multiple">
+                            <?php foreach (($tpl->get('orgUnits') ?? []) as $unit) { ?>
+                                <?php $unitId = (int) ($unit['id'] ?? 0); ?>
+                                <option value="<?= $unitId ?>" <?= in_array($unitId, $mappedUnitIds, true) ? 'selected="selected"' : '' ?>>
+                                    <?= $tpl->escape((string) ($unit['name'] ?? '')) ?>
+                                </option>
+                            <?php } ?>
+                        </select><br />
 
 
 

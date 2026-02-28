@@ -84,37 +84,30 @@ $projects = $tpl->get('relations');
                         type="text" name="lastname" id="lastname"
                         value="<?php echo $values['lastname'] ?>" /><br />
 
-            <label for="role"><?php echo $tpl->__('label.role'); ?></label>
-            <select name="role" id="role">
-
-                <?php foreach ($tpl->get('roles') as $key => $role) { ?>
-                    <?php if ($login::userHasRole(\Leantime\Domain\Auth\Models\Roles::$manager) && $key > 30) {
-                        continue;
-                    }?>
-                        <option value="<?php echo $key; ?>"
-                        <?php if ($key == $values['role']) {
-                            ?> selected="selected" <?php
-                        } ?>>
-                        <?= $tpl->__('label.roles.'.$role) ?>
+            <label for="businessRoleId"><?php echo $tpl->__('label.role'); ?></label>
+            <select name="businessRoleId" id="businessRoleId">
+                <option value="">-- Select role --</option>
+                <?php foreach (($tpl->get('orgRoles') ?? []) as $role) { ?>
+                    <option value="<?php echo (int) $role['id']; ?>"
+                        <?php if ((int) ($role['id'] ?? 0) === (int) ($values['businessRoleId'] ?? 0)) { ?>
+                            selected="selected"
+                        <?php } ?>
+                    >
+                        <?php $tpl->e($role['name']); ?>
                     </option>
                 <?php } ?>
-
             </select> <br />
 
-            <label for="client"><?php echo $tpl->__('label.client') ?></label>
-            <select name='client' id="client">
-                <?php if ($login::userIsAtLeast('admin')) {?>
-                    <option value="0" selected="selected"><?php echo $tpl->__('label.no_clients') ?></option>
-                <?php } ?>
+            <label for="userClients"><?php echo $tpl->__('label.client') ?>s</label>
+            <select name='userClients[]' id="userClients" multiple="multiple">
                 <?php foreach ($tpl->get('clients') as $client) { ?>
                     <?php if ($login::userHasRole(\Leantime\Domain\Auth\Models\Roles::$manager) && $client['id'] !== session('userdata.clientId')) {
                         continue;
-                    }
-                    ?>
+                    } ?>
                     <option value="<?php echo $client['id'] ?>"
-                            <?php if ($client['id'] == $values['clientId'] || $tpl->get('preSelectedClient') == $client['id']) {
-                                ?>selected="selected"<?php
-                            } ?>><?php $tpl->e($client['name']) ?></option>
+                            <?php if ($client['id'] == $values['clientId'] || $tpl->get('preSelectedClient') == $client['id']) { ?>
+                                selected="selected"
+                            <?php } ?>><?php $tpl->e($client['name']) ?></option>
                 <?php } ?>
             </select><br/>
             <br/>
@@ -138,8 +131,12 @@ $projects = $tpl->get('relations');
                 <label for="jobLevel"><?php echo $tpl->__('label.jobLevel'); ?></label> <input
                     type="text" name="jobLevel" id="jobLevel" value="<?php echo $values['jobLevel'] ?>" /><br />
 
-                <label for="department"><?php echo $tpl->__('label.department'); ?></label> <input
-                    type="text" name="department" id="department" value="<?php echo $values['department'] ?>" /><br />
+                <label for="userUnits">Units</label>
+                <select name="userUnits[]" id="userUnits" multiple="multiple">
+                    <?php foreach (($tpl->get('orgUnits') ?? []) as $unit) { ?>
+                        <option value="<?php echo (int) $unit['id']; ?>"><?php $tpl->e($unit['name']); ?></option>
+                    <?php } ?>
+                </select><br />
 
 
                     <p class="stdformbutton">

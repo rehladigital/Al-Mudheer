@@ -1286,7 +1286,7 @@ class Projects
         }
 
         if ($departmentId <= 0 || ! in_array($departmentId, $allowedDepartments, true)) {
-            return ['allowed' => false, 'message' => 'Department Manager can only create projects in assigned departments.'];
+            return ['allowed' => false, 'message' => 'Department Manager can only create projects in assigned units.'];
         }
 
         return ['allowed' => true, 'message' => ''];
