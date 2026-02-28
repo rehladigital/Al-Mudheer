@@ -3,6 +3,7 @@
 namespace Leantime\Domain\Setting\Repositories;
 
 use Illuminate\Database\ConnectionInterface;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Leantime\Core\Db\Db as DbCore;
 
@@ -17,6 +18,8 @@ class Organization
 
     public function getDepartments(): array
     {
+        $this->ensureRbacSchema();
+
         if (! Schema::hasTable('zp_org_departments')) {
             return [];
         }
@@ -55,6 +58,8 @@ class Organization
 
     public function getRoles(): array
     {
+        $this->ensureRbacSchema();
+
         if (! Schema::hasTable('zp_org_roles')) {
             return [];
         }
@@ -140,6 +145,8 @@ class Organization
 
     public function addDepartment(string $name): int
     {
+        $this->ensureRbacSchema();
+
         if (! Schema::hasTable('zp_org_departments')) {
             return 0;
         }
@@ -166,6 +173,8 @@ class Organization
 
     public function addRole(string $name, int $systemRole = 20): int
     {
+        $this->ensureRbacSchema();
+
         if (! Schema::hasTable('zp_org_roles')) {
             return 0;
         }
@@ -218,6 +227,82 @@ class Organization
                 'createdOn' => date('Y-m-d H:i:s'),
                 'updatedOn' => date('Y-m-d H:i:s'),
             ]);
+        }
+    }
+
+    private function ensureRbacSchema(): void
+    {
+        if (! Schema::hasTable('zp_org_departments')) {
+            Schema::create('zp_org_departments', function (Blueprint $table) {
+                $table->id();
+                $table->string('name', 150);
+                $table->string('slug', 180)->unique();
+                $table->tinyInteger('isActive')->default(1);
+                $table->dateTime('createdOn')->nullable();
+                $table->dateTime('updatedOn')->nullable();
+            });
+        }
+
+        if (! Schema::hasTable('zp_org_roles')) {
+            Schema::create('zp_org_roles', function (Blueprint $table) {
+                $table->id();
+                $table->string('name', 150);
+                $table->string('slug', 180)->unique();
+                $table->integer('systemRole')->default(20);
+                $table->tinyInteger('isProtected')->default(0);
+                $table->dateTime('createdOn')->nullable();
+                $table->dateTime('updatedOn')->nullable();
+            });
+        }
+
+        if (! Schema::hasTable('zp_org_user_roles')) {
+            Schema::create('zp_org_user_roles', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('userId');
+                $table->unsignedBigInteger('roleId');
+                $table->dateTime('updatedOn')->nullable();
+                $table->unique(['userId'], 'ux_org_user_role');
+            });
+        }
+
+        if (! Schema::hasTable('zp_org_user_clients')) {
+            Schema::create('zp_org_user_clients', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('userId');
+                $table->unsignedBigInteger('clientId');
+                $table->dateTime('createdOn')->nullable();
+                $table->unique(['userId', 'clientId'], 'ux_org_user_client');
+            });
+        }
+
+        if (! Schema::hasTable('zp_org_user_departments')) {
+            Schema::create('zp_org_user_departments', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('userId');
+                $table->unsignedBigInteger('departmentId');
+                $table->dateTime('createdOn')->nullable();
+                $table->unique(['userId', 'departmentId'], 'ux_org_user_department');
+            });
+        }
+
+        if (! Schema::hasTable('zp_org_department_clients')) {
+            Schema::create('zp_org_department_clients', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('departmentId');
+                $table->unsignedBigInteger('clientId');
+                $table->dateTime('createdOn')->nullable();
+                $table->unique(['departmentId', 'clientId'], 'ux_org_department_client');
+            });
+        }
+
+        if (! Schema::hasTable('zp_org_project_departments')) {
+            Schema::create('zp_org_project_departments', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('projectId');
+                $table->unsignedBigInteger('departmentId');
+                $table->dateTime('updatedOn')->nullable();
+                $table->unique(['projectId'], 'ux_org_project_department_project');
+            });
         }
     }
 
@@ -374,6 +459,8 @@ class Organization
 
     public function saveUserAccessMappings(array $roleByUser, array $clientsByUser, array $departmentsByUser, array $userIds = []): void
     {
+        $this->ensureRbacSchema();
+
         if (! Schema::hasTable('zp_org_user_roles')
             || ! Schema::hasTable('zp_org_user_clients')
             || ! Schema::hasTable('zp_org_user_departments')) {
@@ -534,6 +621,8 @@ class Organization
 
     public function linkProjectDepartment(int $projectId, int $departmentId): void
     {
+        $this->ensureRbacSchema();
+
         if (! Schema::hasTable('zp_org_project_departments')) {
             return;
         }

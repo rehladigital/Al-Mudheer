@@ -103,8 +103,12 @@ class ShowAll extends Controller
             if ($name === '') {
                 $this->tpl->setNotification('Unit name is required.', 'error');
             } else {
-                $this->organizationRepo->addDepartment($name);
-                $this->tpl->setNotification('Unit added successfully.', 'success');
+                $unitId = $this->organizationRepo->addDepartment($name);
+                if ($unitId > 0) {
+                    $this->tpl->setNotification('Unit added successfully.', 'success');
+                } else {
+                    $this->tpl->setNotification('Unit could not be added. Please run database update and try again.', 'error');
+                }
             }
 
             return Frontcontroller::redirect($redirectTo);
@@ -118,8 +122,12 @@ class ShowAll extends Controller
             } elseif ($this->organizationRepo->roleNameExists($name)) {
                 $this->tpl->setNotification('Role name must be unique.', 'error');
             } else {
-                $this->organizationRepo->addRole($name, $systemRole);
-                $this->tpl->setNotification('Role added successfully.', 'success');
+                $roleId = $this->organizationRepo->addRole($name, $systemRole);
+                if ($roleId > 0) {
+                    $this->tpl->setNotification('Role added successfully.', 'success');
+                } else {
+                    $this->tpl->setNotification('Role could not be added. Please run database update and try again.', 'error');
+                }
             }
 
             return Frontcontroller::redirect($redirectTo);
